@@ -8,6 +8,10 @@
 # folders
 build/
 vs*/
+lib/
+simpleini/
+include/
+view/
 
 # files
 *.zip
