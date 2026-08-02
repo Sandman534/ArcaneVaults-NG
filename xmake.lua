@@ -1,7 +1,7 @@
 set_xmakever('3.0.1')
 includes('lib/commonlibsse-ng')
 
-set_project('GeneralStoresCompanion-NG')
+set_project('ArcaneVaults-NG')
 set_version('1.0')
 set_license('GPL-3.0')
 
@@ -34,7 +34,8 @@ if has_config('skyrim_vr') and (has_config('skyrim_se') or has_config('skyrim_ae
     raise('Cannot combine Skyrim VR with SE/AE builds. Enable only one configuration.')
 end
 
-target('GeneralStoresCompanion-NG')
+add_rules("plugin.compile_commands.autoupdate", {outputdir = ".vscode"})
+target('ArcaneVaults-NG')
     add_deps('commonlibsse-ng')
 
     local runtime = 'se_ae'
@@ -47,9 +48,9 @@ target('GeneralStoresCompanion-NG')
     end
 
     add_rules('commonlibsse-ng.plugin', {
-        name        = 'GeneralStoresCompanion-NG',
+        name        = 'ArcaneVaults-NG',
         author      = 'Sandman53',
-        description = 'General Storage Companion',
+        description = 'SKSE Storage Solution',
         runtime     = runtime
     })
 
@@ -58,9 +59,9 @@ target('GeneralStoresCompanion-NG')
 
     add_includedirs(
         'src',
+        '$(projectdir)/include',
         '$(projectdir)',
         '$(projectdir)/ClibUtil',
-        '$(projectdir)/ClibUtil/detail',
         '$(projectdir)/xbyak',
         '$(projectdir)/simpleini'
     )
