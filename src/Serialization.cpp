@@ -1,10 +1,19 @@
 #include "Serialization.h"
 #include "RedirectManager.h"
+#include "Settings.h"
 
 namespace Serialization
 {
     void SaveCallback(SKSE::SerializationInterface* a_skse) {
-        if (!a_skse || !a_skse->OpenRecord(SerializationType, SerializationVersion)) return;
+        if (!a_skse) return;
+
+        // Global redirects are shared through the INI instead of stored per save.
+        if (Settings::GetSingleton()->GSC_GlobalRedirects) {
+            Settings::GetSingleton()->SaveRedirects();
+            return;
+        }
+
+        if (!a_skse->OpenRecord(SerializationType, SerializationVersion)) return;
 
         const auto& redirects = RedirectManager::GetSingleton()->GetRedirects();
         const auto count = static_cast<std::uint32_t>(redirects.size());
@@ -23,6 +32,12 @@ namespace Serialization
 
     void LoadCallback(SKSE::SerializationInterface* a_skse) {
         if (!a_skse) return;
+
+        // Global redirects are shared through the INI instead of stored per save.
+        if (Settings::GetSingleton()->GSC_GlobalRedirects) {
+            Settings::GetSingleton()->LoadRedirects();
+            return;
+        }
 
         auto* manager = RedirectManager::GetSingleton();
         manager->Clear();
@@ -87,7 +102,11 @@ namespace Serialization
     }
 
     void RevertCallback([[maybe_unused]] SKSE::SerializationInterface* a_skse) {
-        RedirectManager::GetSingleton()->Clear();
-        logger::info("Cleared redirects");
+        if (Settings::GetSingleton()->GSC_GlobalRedirects) {
+            Settings::GetSingleton()->LoadRedirects();
+        } else {
+            RedirectManager::GetSingleton()->Clear();
+            logger::info("Cleared redirects");
+        }
     }
 }

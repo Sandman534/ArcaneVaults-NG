@@ -63,6 +63,7 @@ target('ArcaneVaults-NG')
         '$(projectdir)',
         '$(projectdir)/ClibUtil',
         '$(projectdir)/xbyak',
+        '$(projectdir)/json/include',
         '$(projectdir)/simpleini'
     )
 

@@ -11,18 +11,15 @@ namespace {
             if (movie) {
                 RE::GFxValue index;
                 // Match SkyUILib's getActiveMenuIndex() implementation.
-                if (movie->GetVariable(&index, "_root.listDialog.menuList.listState.activeEntry.itemIndex") && index.IsNumber()) {
+                if (movie->GetVariable(&index, "_root.listDialog.menuList.listState.activeEntry.itemIndex") && index.IsNumber())
                     selectedIndex = static_cast<std::int32_t>(index.GetNumber());
-                }
             }
 
-            // if (!ContainerSelectionState::GetSingleton()->Complete(selectedIndex)) {
-            //     logger::warn("Container selection was not mapped (selected index: {})", selectedIndex);
-            // }
+            if (!ContainerSelectionState::GetSingleton()->Complete(selectedIndex))
+                logger::warn("Container selection was not mapped (selected index: {})", selectedIndex);
 
-            if (auto* queue = RE::UIMessageQueue::GetSingleton()) {
+            if (auto* queue = RE::UIMessageQueue::GetSingleton())
                 queue->AddMessage(ContainerListMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
-            }
         }
     };
 }
@@ -43,16 +40,12 @@ bool ContainerSelectionState::Complete(std::int32_t selectedIndex) {
         return false;
     }
 
-    const auto sourceID = source_->GetFormID();
     const auto& choice = choices_[selectedIndex];
     auto* destination = RE::TESForm::LookupByID<RE::TESObjectREFR>(choice.formID);
     bool mapped = false;
 
-    if (destination && destination != source_.get()) {
+    if (destination && destination != source_.get())
         mapped = RedirectManager::GetSingleton()->Add(source_.get(), destination);
-        // if (mapped)
-        //     logger::info("Mapped target container {:08X} to '{}' ({:08X})", sourceID, choice.name, destination->GetFormID());
-    }
 
     Reset();
     return mapped;

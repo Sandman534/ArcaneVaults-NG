@@ -58,7 +58,7 @@ public:
     void SortItems();
     void OffloadItems();
     void VaultAssignment(RE::TESObjectREFRPtr a_source);
-
+    
     // Container Functions
     void VaultMenu(RE::TESObjectREFR* a_source);
     void VaultDetail1Menu(RE::TESObjectREFR* a_source);
@@ -75,7 +75,7 @@ public:
     void ArmorMenu(RE::TESObjectREFR* a_source);
     void ArmorLightMenu(RE::TESObjectREFR* a_source);
     void ArmorHeavyMenu(RE::TESObjectREFR* a_source);
-    void ArmorShieldMenu(RE::TESObjectREFR* a_source);
+    void ArmorJewelryMenu(RE::TESObjectREFR* a_source);
     void ArmorClothingMenu(RE::TESObjectREFR* a_source);
     void WeaponMenu(RE::TESObjectREFR* a_source);
     void WeaponArcheryMenu(RE::TESObjectREFR* a_source);
@@ -112,7 +112,7 @@ private:
     void ShowArmorMenu(RE::TESObjectREFR* a_source);
     void ShowArmorLightMenu(RE::TESObjectREFR* a_source);
     void ShowArmorHeavyMenu(RE::TESObjectREFR* a_source);
-    void ShowArmorShieldMenu(RE::TESObjectREFR* a_source);
+    void ShowArmorJewelryMenu(RE::TESObjectREFR* a_source);
     void ShowArmorClothingMenu(RE::TESObjectREFR* a_source);
     void ShowWeaponMenu(RE::TESObjectREFR* a_source);
     void ShowWeaponArcheryMenu(RE::TESObjectREFR* a_source);

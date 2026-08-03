@@ -144,6 +144,8 @@ void Utility::LoadAllForms() {
 
     // Storage Containers
     LoadContainers(dataHandler);
+    CacheTemperRecipes(dataHandler);
+
     logger::info("All forms are loaded.");
 }
 
@@ -158,7 +160,8 @@ void Utility::LoadContainers([[maybe_unused]] RE::TESDataHandler* dataHandler) {
     AddContainer(dataHandler, Container::Smelting, RE::FormID(0xDAA), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->SmithSmeltMenu(a_source); }); 
     AddContainer(dataHandler, Container::Tanning, RE::FormID(0xDAB), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->SmithTanMenu(a_source); }); 
     AddContainer(dataHandler, Container::Construction, RE::FormID(0xDA9), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->SmithConstructMenu(a_source); });
-    
+    AddContainer(dataHandler, Container::Gemstone, RE::FormID(0xDA2), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->GemstoneMenu(a_source); });
+
     // Alchemy
     AddContainer(dataHandler, Container::Alchemy, RE::FormID(0xD94), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->AlchemyMenu(a_source); }); 
     AddContainer(dataHandler, Container::Concoction, RE::FormID(0xDA3), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->PotionMenu(a_source); });
@@ -184,7 +187,7 @@ void Utility::LoadContainers([[maybe_unused]] RE::TESDataHandler* dataHandler) {
     AddContainer(dataHandler, Container::Armor, RE::FormID(0xD95), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ArmorMenu(a_source); });
     AddContainer(dataHandler, Container::HeavyArmor, RE::FormID(0xD97), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ArmorHeavyMenu(a_source); });
     AddContainer(dataHandler, Container::LightArmor, RE::FormID(0xD98), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ArmorLightMenu(a_source); });
-    AddContainer(dataHandler, Container::Shield, RE::FormID(0xD99), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ArmorShieldMenu(a_source); });
+    AddContainer(dataHandler, Container::Jewelry, RE::FormID(0xD99), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ArmorJewelryMenu(a_source); });
     AddContainer(dataHandler, Container::Clothing, RE::FormID(0xD96), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ArmorClothingMenu(a_source); });
 
     // Books and Scrolls
@@ -192,16 +195,12 @@ void Utility::LoadContainers([[maybe_unused]] RE::TESDataHandler* dataHandler) {
     AddContainer(dataHandler, Container::Scroll, RE::FormID(0xD9B), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->ScrollMenu(a_source); });
     
     // Misc
-    AddContainer(dataHandler, Container::Gemstone, RE::FormID(0xDA2), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->GemstoneMenu(a_source); });
     AddContainer(dataHandler, Container::Treasure, RE::FormID(0xDAD), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->TreasureMenu(a_source); });
     AddContainer(dataHandler, Container::Stolen, RE::FormID(0xDAE), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->StolenMenu(a_source); });
     AddContainer(dataHandler, Container::Follower, RE::FormID(0xDA1), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->FollowerMenu(a_source); });
 }
 
-void Utility::CacheTemperRecipes() {
-    auto* dataHandler = RE::TESDataHandler::GetSingleton();
-    if (!dataHandler) return;
-    
+void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandler) {
     // Get all constructible objects
     const auto recipes = dataHandler->GetFormArray(RE::FormType::ConstructibleObject);
 

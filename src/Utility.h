@@ -28,7 +28,7 @@ public:
     // Load Forms
     void LoadContainers([[maybe_unused]] RE::TESDataHandler* dataHandler);
     void LoadAllForms();
-    void CacheTemperRecipes();
+    void CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandler);
 
     bool FoundRestore(RE::AlchemyItem* a_potion);
 

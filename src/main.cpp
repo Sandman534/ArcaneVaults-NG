@@ -4,6 +4,9 @@
 #include "ContainerMenu.h"
 #include "Compatibility.h"
 #include "Serialization.h"
+#include "Settings.h"
+#include "AVUI.h"
+#include "Translation.h"
 
 using namespace RE::BSScript;
 using namespace SKSE;
@@ -14,8 +17,11 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	switch (message->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		Utility::GetSingleton()->LoadAllForms();
+		Settings::GetSingleton()->Init();
 		Events::Init();
 		Menus::Init();
+		AVTranslation::Install();
+		AVUI::Register();		
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
 		QuickLoot::QuickLootAPI::Init();

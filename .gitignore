@@ -12,6 +12,7 @@ lib/
 simpleini/
 include/
 view/
+json/
 
 # files
 *.zip

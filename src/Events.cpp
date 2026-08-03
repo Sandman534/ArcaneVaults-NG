@@ -3,7 +3,12 @@
 #include "Utility.h"
 #include "Settings.h"
 #include "ContainerMenu.h"
+#include "Stores.h"
+#include "ItemClass.h"
 
+//==============================================
+//  Redirects
+//==============================================
 class RedirectedContainerState {
 public:
     static RedirectedContainerState* GetSingleton() {
@@ -23,9 +28,8 @@ public:
     }
 
     void OnContainerMenuOpen() {
-        if (destination_ != RE::RefHandle{} && RE::ContainerMenu::GetTargetRefHandle() == destination_) {
+        if (destination_ != RE::RefHandle{} && RE::ContainerMenu::GetTargetRefHandle() == destination_)
             destinationMenuOpen_ = true;
-        }
     }
 
     void OnContainerMenuClose() {
@@ -92,6 +96,9 @@ private:
     bool menuOpened_{ false };
 };
 
+//==============================================
+// Hooks
+//==============================================
 class ContainerActivationHook {
 public:
     static void Install() {
@@ -215,6 +222,9 @@ private:
     static inline REL::Relocation<decltype(Thunk)> original_;
 };
 
+//==============================================
+// Event Handlers
+//==============================================
 class ContainerMenuEventHandler final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
 public:
     static ContainerMenuEventHandler* GetSingleton() {
@@ -225,9 +235,8 @@ public:
     RE::BSEventNotifyControl ProcessEvent(
         const RE::MenuOpenCloseEvent* event,
         [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* eventSource) override {
-        if (!event || event->menuName != RE::ContainerMenu::MENU_NAME) {
+        if (!event || event->menuName != RE::ContainerMenu::MENU_NAME)
             return RE::BSEventNotifyControl::kContinue;
-        }
 
         if (event->opening) {
             RedirectedContainerState::GetSingleton()->OnContainerMenuOpen();
@@ -239,7 +248,131 @@ public:
 
         return RE::BSEventNotifyControl::kContinue;
     }
+
+	static void Register() {
+        RE::UI* uiManager = RE::UI::GetSingleton();
+        uiManager->AddEventSink(ContainerMenuEventHandler::GetSingleton());
+		logger::info("Handler Installed: Container Event");
+    }
 };
+
+class FurnitureEventHandler final : public RE::BSTEventSink<RE::TESFurnitureEvent> {
+public:
+    static FurnitureEventHandler* GetSingleton() {
+        static FurnitureEventHandler singleton;
+        return std::addressof(singleton);
+    }
+
+    RE::BSEventNotifyControl ProcessEvent(const RE::TESFurnitureEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESFurnitureEvent>* a_eventSource) override {
+        if (!a_event || !a_event->actor || !a_event->targetFurniture)
+            return RE::BSEventNotifyControl::kContinue;
+
+        auto* player = RE::PlayerCharacter::GetSingleton();
+        if (a_event->actor.get() != player)
+            return RE::BSEventNotifyControl::kContinue;
+
+        auto* furniture = a_event->targetFurniture->GetBaseObject()->As<RE::TESFurniture>();
+        if (!furniture)
+            return RE::BSEventNotifyControl::kContinue;
+
+        const auto benchType = furniture->workBenchData.benchType.get();
+        if (benchType == RE::TESFurniture::WorkBenchData::BenchType::kNone)
+            return RE::BSEventNotifyControl::kContinue;
+
+        switch (a_event->type.get()) {
+        case RE::TESFurnitureEvent::FurnitureEventType::kEnter:
+            OnCraftingFurnitureEntered(a_event->targetFurniture.get(), benchType);
+            break;
+
+        case RE::TESFurnitureEvent::FurnitureEventType::kExit:
+            OnCraftingFurnitureExited(a_event->targetFurniture.get(), benchType);
+            break;
+        }
+
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+	static void Register() {
+        RE::ScriptEventSourceHolder* scriptSourceManager = RE::ScriptEventSourceHolder::GetSingleton();
+        scriptSourceManager->AddEventSink(FurnitureEventHandler::GetSingleton());
+		logger::info("Handler Installed: Furniture");
+    }
+
+private:
+    static void OnCraftingFurnitureEntered(RE::TESObjectREFR* a_furniture, RE::TESFurniture::WorkBenchData::BenchType a_benchType) {
+        logger::info("Player entered crafting furniture {:08X}, bench type {}", a_furniture->GetFormID(), std::to_underlying(a_benchType));
+
+        // Check for Craft Loan Setting
+        if (!Settings::GetSingleton()->GSC_CraftingLoan) return;
+
+        // Begin crafting loan
+        switch (a_benchType) {
+        // Alchemy
+        case RE::TESFurniture::WorkBenchData::BenchType::kAlchemy:
+            Stores::GetSingleton()->AllToPlayer(Container::Alchemy);
+            break;
+
+        // Smithing
+        case RE::TESFurniture::WorkBenchData::BenchType::kCreateObject:
+        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingArmor:    
+        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingWeapon:
+            Stores::GetSingleton()->AllToPlayer(Container::Smithing);
+            break;
+
+        // Enchanting Table
+        case RE::TESFurniture::WorkBenchData::BenchType::kEnchanting:
+            Stores::GetSingleton()->AllToPlayer(Container::Soulgem);
+            break;
+        }
+    }
+
+    static void OnCraftingFurnitureExited(RE::TESObjectREFR* a_furniture, RE::TESFurniture::WorkBenchData::BenchType a_benchType) {
+        logger::info("Player exited crafting furniture {:08X}, bench type {}", a_furniture->GetFormID(), std::to_underlying(a_benchType));
+        
+        // Check for Craft Loan Setting
+        if (!Settings::GetSingleton()->GSC_CraftingLoan) return;
+
+        // Restore outstanding crafting loan
+        switch (a_benchType) {
+        // Alchemy
+        case RE::TESFurniture::WorkBenchData::BenchType::kAlchemy:
+            Stores::GetSingleton()->PlayerToStore(ItemCategory::Ingredient, Container::Alchemy);
+            Stores::GetSingleton()->PlayerToStore(ItemCategory::Reagent, Container::Alchemy);
+            break;
+
+        // Smithing
+        case RE::TESFurniture::WorkBenchData::BenchType::kCreateObject:
+        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingArmor:    
+        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingWeapon:
+            Stores::GetSingleton()->PlayerToStore(ItemCategory::Smithing, Container::Smithing);
+            break;
+
+        // Enchanting Table
+        case RE::TESFurniture::WorkBenchData::BenchType::kEnchanting:
+            Stores::GetSingleton()->PlayerToStore(ItemCategory::Soulgem, Container::Soulgem);
+            break;
+        }
+    }
+};
+
+namespace
+{
+    bool PlayerOwnsCurrentCell(const RE::PlayerCharacter* a_player)
+    {
+        if (!a_player) return false;
+
+        auto* cell = a_player->GetParentCell();
+        if (!cell) return false;
+
+        if (const auto* actorOwner = cell->GetActorOwner())
+            return actorOwner == a_player->GetActorBase();
+
+        if (const auto* factionOwner = cell->GetFactionOwner())
+            return a_player->IsInFaction(factionOwner);
+
+        return false;
+    }
+}
 
 class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 	public:
@@ -248,13 +381,13 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 		return &singleton;
     }
 
-    RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>* a_eventSource) {
+    RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, [[maybe_unused]] RE::BSTEventSource<RE::InputEvent*>* a_eventSource) {
 		if (a_event) {
 
 			const auto controlMap = RE::ControlMap::GetSingleton();
 			const auto playerCharacter = RE::PlayerCharacter::GetSingleton();
 			const auto playerControls = RE::PlayerControls::GetSingleton();
-
+            auto settings = Settings::GetSingleton();
 			// If we dont have any of these, return
 			if (!controlMap || !playerCharacter || !playerControls) return RE::BSEventNotifyControl::kContinue;
 
@@ -268,21 +401,34 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 					auto scan_code = button->GetIDCode();
 
 					if ((device == RE::INPUT_DEVICE::kKeyboard || device == RE::INPUT_DEVICE::kGamepad) && !button->IsUp()) {
-						auto durability = Settings::GetSingleton();
-						if (durability && scan_code == Settings::GetSingleton()->GSC_AssignKeyCode) {
+                        auto assignKeyCode = settings->GSC_AssignKeyCode;
+						if (assignKeyCode >= 0 && scan_code == static_cast<decltype(scan_code)>(assignKeyCode)) {
                             auto target = RE::CrosshairPickData::GetSingleton()->target.get();
-                            
                             if (!target) continue;
+                            
+                            // Check player cell
+                            const bool ownsCell = PlayerOwnsCurrentCell(playerCharacter);
 
                             // Container
-                            if (target->GetBaseObject()->As<RE::TESObjectCONT>())
-                                Stores::GetSingleton()->VaultAssignment(target);
+                            if (auto container = target->GetBaseObject()->As<RE::TESObjectCONT>()) {
+                                const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
+                                const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || nonRespawning;
+
+                                if (canAssign)
+                                    Stores::GetSingleton()->VaultAssignment(target);
+                            }
                             
                             // Activate linked to container
                             else if (target->GetBaseObject()->As<RE::TESObjectACTI>()) {
-                                auto* ref = target.get()->GetLinkedRef(nullptr);
-                                if (ref && ref->GetBaseObject()->As<RE::TESObjectCONT>())
-                                    Stores::GetSingleton()->VaultAssignment(target);
+                                if (auto* ref = target.get()->GetLinkedRef(nullptr)) {
+                                    if (auto container = ref->GetBaseObject()->As<RE::TESObjectCONT>()) {
+                                        const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
+                                        const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || nonRespawning;
+
+                                        if (canAssign)
+                                            Stores::GetSingleton()->VaultAssignment(target);
+                                    }
+                                }
                             }
 
 						}
@@ -311,14 +457,17 @@ namespace Events {
     }
 
 	void Init(void) {
-        // Container and Activator Hooks
+        // Container Hooks
         ContainerActivationHook::Install();
         ContainerActivateTextHook::Install();
+
+        // Activator Hooks
         ActivatorActivationHook::Install();
         ActivatorActivateTextHook::Install();
 
-        // Register the container menu
-        RE::UI::GetSingleton()->AddEventSink(ContainerMenuEventHandler::GetSingleton());
+        // Register Events
+        ContainerMenuEventHandler::Register();
+        FurnitureEventHandler::Register();
         InputHandler::Register();
 	}
 }

@@ -37,5 +37,5 @@ namespace util
 #define RELOCATION_OFFSET(SE, AE) REL::VariantOffset(SE, AE, 0).offset()
 
 #include "plugin.h"
-// #include "SKSEMenuFramework.h"
-// #include "HelperFunctions.h"
+#include "SKSEMenuFramework.h"
+#include "HelperFunctions.h"
