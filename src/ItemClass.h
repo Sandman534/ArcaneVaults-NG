@@ -86,6 +86,47 @@
         Archive
     };
 
+    [[nodiscard]] constexpr std::string_view ContainerTranslationKey(Container a_container) noexcept
+    {
+        switch (a_container) {
+        case Container::Master:       return "Vault.Arcane";
+        case Container::Sort:         return "Vault.Conduit";
+        case Container::Alchemy:      return "Vault.Alchemy";
+        case Container::Armor:        return "Vault.Armor";
+        case Container::Clothing:     return "Vault.Clothing";
+        case Container::HeavyArmor:   return "Vault.HeavyArmor";
+        case Container::LightArmor:   return "Vault.LightArmor";
+        case Container::Jewelry:      return "Vault.Jewelry";
+        case Container::Book:         return "Vault.Book";
+        case Container::Food:         return "Vault.Food";
+        case Container::CookedFood:   return "Vault.Cooked";
+        case Container::RawFood:      return "Vault.Raw";
+        case Container::Reagent:      return "Vault.Spice";
+        case Container::Follower:     return "Vault.Follower";
+        case Container::Gemstone:     return "Vault.Gemstones";
+        case Container::Concoction:   return "Vault.Concoction";
+        case Container::Potion:       return "Vault.Potion";
+        case Container::Poison:       return "Vault.Poison";
+        case Container::Restorative:  return "Vault.Restoritive";
+        case Container::Scroll:       return "Vault.Scroll";
+        case Container::Smithing:     return "Vault.Smithing";
+        case Container::Construction: return "Vault.Construction";
+        case Container::Crafting:     return "Vault.Crafting";
+        case Container::Smelting:     return "Vault.Smelting";
+        case Container::Tanning:      return "Vault.Tanning";
+        case Container::Soulgem:      return "Vault.Soulgem";
+        case Container::Treasure:     return "Vault.Treasure";
+        case Container::Stolen:       return "Vault.Stolen";
+        case Container::Weapon:       return "Vault.Weapon";
+        case Container::Archery:      return "Vault.Archery";
+        case Container::OneHand:      return "Vault.OneHand";
+        case Container::TwoHand:      return "Vault.TwoHand";
+        case Container::Staff:        return "Vault.Staff";
+        case Container::None:         return {};
+        }
+        return {};
+    };
+
     inline constexpr std::array<std::pair<std::string_view, ItemCategory>, 25> categoryNames{{
         { "Archery", ItemCategory::Archery },
         { "Book", ItemCategory::Book },

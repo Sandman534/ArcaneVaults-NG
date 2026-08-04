@@ -1,5 +1,7 @@
 #include "Utility.h"
+#include "Translation.h"
 
+using AVTranslation::Translate;
 
 void Utility::AddContainer(RE::TESDataHandler* a_data, Container a_name, RE::FormID a_formid, ContainerGroup a_group, ContainerAction a_action) {
     auto* form = a_data->LookupForm(a_formid, pluginArcaneVault);
@@ -12,6 +14,13 @@ void Utility::AddContainer(RE::TESDataHandler* a_data, Container a_name, RE::For
     if (!container) {
         logger::error("Form {:08X} is not a TESObjectREFR", form->GetFormID());
         return;
+    }
+
+    const auto translationKey = ContainerTranslationKey(a_name);
+    auto* baseContainer = container->GetBaseObject() ? container->GetBaseObject()->As<RE::TESObjectCONT>() : nullptr;
+    if (baseContainer && !translationKey.empty()) {
+        const auto translatedName = std::format("{} {}", Translate(std::string(translationKey)), Translate("Vault.Vault"));
+        baseContainer->SetFullName(translatedName.c_str());
     }
 
     containerMap.insert_or_assign(std::move(a_name), ContainerEntry{ container, a_group, std::move(a_action) });

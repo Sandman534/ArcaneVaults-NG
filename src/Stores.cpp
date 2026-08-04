@@ -293,12 +293,12 @@ void Stores::ShowVaultMenu(RE::TESObjectREFR* a_source) {
     const auto sourceHandle = a_source->GetHandle();
     std::vector<MenuOption> options;
 
-    options.push_back({Translate("Vault.Offload"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.ArcaneOffload"), [this, sourceHandle] {
         OffloadItems();
         if (auto source = sourceHandle.get()) VaultMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.Sort"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.ArcaneSort"), [this, sourceHandle] {
         if (auto source = sourceHandle.get())
             OpenStorageMenu(Container::Sort, source.get(), [this](RE::TESObjectREFR* a_source) {
                 SortItems();
@@ -306,7 +306,7 @@ void Stores::ShowVaultMenu(RE::TESObjectREFR* a_source) {
             });
     }});
 
-    options.push_back({Translate("Vault.Open"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.ArcaneVaults"), [this, sourceHandle] {
         if (auto source = sourceHandle.get()) VaultDetail1Menu(source.get());
     }});
 
@@ -314,8 +314,9 @@ void Stores::ShowVaultMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Arcane"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Arcane"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::VaultDetail1Menu(RE::TESObjectREFR* a_source) {
@@ -398,8 +399,9 @@ void Stores::ShowVaultDetail1Menu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Arcane"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Arcane"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::VaultDetail2Menu(RE::TESObjectREFR* a_source) {
@@ -412,21 +414,21 @@ void Stores::ShowVaultDetail2Menu(RE::TESObjectREFR* a_source) {
     const auto sourceHandle = a_source->GetHandle();
     std::vector<MenuOption> options;
 
-    options.push_back({Translate("Vault.Books"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.Book"), [this, sourceHandle] {
         if (auto source = sourceHandle.get())
             OpenStorageMenu(Container::Book, source.get(), [this](RE::TESObjectREFR* a_source) {
                 ShowVaultDetail2Menu(a_source);
             });
     }});
 
-    options.push_back({Translate("Vault.Scrolls"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.Scroll"), [this, sourceHandle] {
         if (auto source = sourceHandle.get())
             OpenStorageMenu(Container::Scroll, source.get(), [this](RE::TESObjectREFR* a_source) {
                 ShowVaultDetail2Menu(a_source);
             });
     }});
 
-    options.push_back({Translate("Vault.Soulgems"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.Soulgem"), [this, sourceHandle] {
         if (auto source = sourceHandle.get())
             OpenStorageMenu(Container::Soulgem, source.get(), [this](RE::TESObjectREFR* a_source) {
                 ShowVaultDetail2Menu(a_source);
@@ -462,8 +464,9 @@ void Stores::ShowVaultDetail2Menu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Arcane"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Arcane"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 //===================================================
@@ -498,15 +501,16 @@ void Stores::VaultAssignment(RE::TESObjectREFRPtr a_source) {
         RE::UIMessageQueue::GetSingleton()->AddMessage(ContainerListMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
     }});
 
-    options.push_back({Translate("Vault.Remove"), [this, a_source] {
+    options.push_back({Translate("Vault.AssignRemove"), [this, a_source] {
         auto* source = a_source.get();
         if (source) RedirectManager::GetSingleton()->Remove(source);
     }});
 
     options.push_back({Translate("Vault.Exit"), [] { }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Arcane"),Translate("Vault.Assign"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Arcane"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 //===================================================
@@ -555,7 +559,7 @@ void Stores::ShowAlchemyMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.CookingItems"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.GatherCooking"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::Reagent, Container::Alchemy);
         RE::DebugNotification(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
@@ -574,8 +578,9 @@ void Stores::ShowAlchemyMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Alchemy"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Alchemy"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::SoulgemMenu(RE::TESObjectREFR* a_source) {
@@ -594,13 +599,13 @@ void Stores::ShowSoulgemMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) SoulgemMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.SoulgemGrand"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.StoreGrandSouls"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::GrandSoulgem, Container::Soulgem);
         RE::DebugNotification(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) SoulgemMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.SoulgemEmpty"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.GatherEmptySouls"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::EmptySoulgem, Container::Soulgem);
         RE::DebugNotification(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) SoulgemMenu(source.get());
@@ -617,8 +622,9 @@ void Stores::ShowSoulgemMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Soulgem"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Soulgems"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 //===================================================
@@ -685,8 +691,9 @@ void Stores::ShowPotionMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Concoction"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Concoction"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::PotionPositiveMenu(RE::TESObjectREFR* a_source) {
@@ -775,7 +782,7 @@ void Stores::ShowBookMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) BookMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.SpellTomes"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.GatherSpellTomes"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::SpellTome, Container::Book);
         RE::DebugNotification(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) BookMenu(source.get());
@@ -792,8 +799,9 @@ void Stores::ShowBookMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Book"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Books"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::ScrollMenu(RE::TESObjectREFR* a_source) {
@@ -837,8 +845,9 @@ void Stores::ShowScrollMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Scroll"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Scrolls"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 //===================================================
@@ -927,8 +936,9 @@ void Stores::ShowSmithMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Smithing"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Smithing"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::SmithCraftMenu(RE::TESObjectREFR* a_source) {
@@ -1050,20 +1060,10 @@ void Stores::ShowFoodMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) FoodMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.RawItems"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.StoreRaw"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::RawFood, Container::Food);
         RE::DebugNotification(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) FoodMenu(source.get());
-    }});
-
-    options.push_back({Translate("Vault.Open"), [this, sourceHandle] {
-        AllToStore(Container::RawFood, Container::Food);
-        AllToStore(Container::CookedFood, Container::Food);
-
-        if (auto source = sourceHandle.get())
-            OpenStorageMenu(Container::Food, source.get(), [this](RE::TESObjectREFR* a_source) {
-                FoodMenu(a_source);
-            });
     }});
 
     options.push_back({Translate("Vault.Cooked"), [this, sourceHandle] {
@@ -1096,12 +1096,23 @@ void Stores::ShowFoodMenu(RE::TESObjectREFR* a_source) {
             });
     }});
 
+    options.push_back({Translate("Vault.Open"), [this, sourceHandle] {
+        AllToStore(Container::RawFood, Container::Food);
+        AllToStore(Container::CookedFood, Container::Food);
+
+        if (auto source = sourceHandle.get())
+            OpenStorageMenu(Container::Food, source.get(), [this](RE::TESObjectREFR* a_source) {
+                FoodMenu(a_source);
+            });
+    }});
+
     options.push_back({Translate("Vault.Exit"), [this, sourceHandle] {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Food"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Food"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::FoodCookedMenu(RE::TESObjectREFR* a_source) {
@@ -1247,8 +1258,9 @@ void Stores::ShowArmorMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Armor"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Armor"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::ArmorLightMenu(RE::TESObjectREFR* a_source) {
@@ -1380,7 +1392,7 @@ void Stores::ShowWeaponMenu(RE::TESObjectREFR* a_source) {
             });
     }});
 
-    options.push_back({Translate("Vault.Staffs"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.Staff"), [this, sourceHandle] {
         StoreToStore(ItemCategory::Staff, Container::Weapon, Container::Staff);
         if (auto source = sourceHandle.get())
             OpenStorageMenu(Container::Staff, source.get(), [this](RE::TESObjectREFR* a_source) {
@@ -1414,8 +1426,9 @@ void Stores::ShowWeaponMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) CloseStoreObject(source.get());
     }});
 
+    const auto title = std::format("{} {}",Translate("Vault.Weapon"),Translate("Vault.Vault"));
     const auto cancelIndex = static_cast<std::int32_t>(options.size() - 1);
-    ShowDynamicMessageBox(Translate("Vault.Weapon"), std::move(options), cancelIndex);
+    ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
 void Stores::WeaponArcheryMenu(RE::TESObjectREFR* a_source) {

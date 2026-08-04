@@ -7,6 +7,27 @@
 #include "ItemClass.h"
 
 //==============================================
+//  Extra Functions
+//==============================================
+namespace {
+    bool PlayerOwnsCurrentCell(const RE::PlayerCharacter* a_player)
+    {
+        if (!a_player) return false;
+
+        auto* cell = a_player->GetParentCell();
+        if (!cell) return false;
+
+        if (const auto* actorOwner = cell->GetActorOwner())
+            return actorOwner == a_player->GetActorBase();
+
+        if (const auto* factionOwner = cell->GetFactionOwner())
+            return a_player->IsInFaction(factionOwner);
+
+        return false;
+    }
+}
+
+//==============================================
 //  Redirects
 //==============================================
 class RedirectedContainerState {
@@ -354,25 +375,6 @@ private:
         }
     }
 };
-
-namespace
-{
-    bool PlayerOwnsCurrentCell(const RE::PlayerCharacter* a_player)
-    {
-        if (!a_player) return false;
-
-        auto* cell = a_player->GetParentCell();
-        if (!cell) return false;
-
-        if (const auto* actorOwner = cell->GetActorOwner())
-            return actorOwner == a_player->GetActorBase();
-
-        if (const auto* factionOwner = cell->GetFactionOwner())
-            return a_player->IsInFaction(factionOwner);
-
-        return false;
-    }
-}
 
 class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 	public:

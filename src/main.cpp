@@ -16,11 +16,11 @@ using namespace SKSE::stl;
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	switch (message->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
+		AVTranslation::Install();
 		Utility::GetSingleton()->LoadAllForms();
 		Settings::GetSingleton()->Init();
 		Events::Init();
 		Menus::Init();
-		AVTranslation::Install();
 		AVUI::Register();		
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
