@@ -137,8 +137,6 @@ void Stores::PlayerToStore(ItemCategory a_category, Container a_chest, int i_cou
             player->RemoveItem(item, 9999, RE::ITEM_REMOVE_REASON::kStoreInContainer, nullptr, chest);
         else
             player->RemoveItem(item, i_count, RE::ITEM_REMOVE_REASON::kStoreInContainer, nullptr, chest);
-
-        
     }
 }
 
@@ -435,13 +433,6 @@ void Stores::ShowVaultDetail2Menu(RE::TESObjectREFR* a_source) {
             });
     }});
 
-    options.push_back({Translate("Vault.Stolen"), [this, sourceHandle] {
-        if (auto source = sourceHandle.get())
-            OpenStorageMenu(Container::Stolen, source.get(), [this](RE::TESObjectREFR* a_source) {
-                ShowVaultDetail2Menu(a_source);
-            });
-    }});
-
     options.push_back({Translate("Vault.Treasure"), [this, sourceHandle] {
         if (auto source = sourceHandle.get())
             OpenStorageMenu(Container::Treasure, source.get(), [this](RE::TESObjectREFR* a_source) {
@@ -449,9 +440,9 @@ void Stores::ShowVaultDetail2Menu(RE::TESObjectREFR* a_source) {
             });
     }});
 
-    options.push_back({Translate("Vault.Follower"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.Personal"), [this, sourceHandle] {
         if (auto source = sourceHandle.get())
-            OpenStorageMenu(Container::Follower, source.get(), [this](RE::TESObjectREFR* a_source) {
+            OpenStorageMenu(Container::Personal, source.get(), [this](RE::TESObjectREFR* a_source) {
                 ShowVaultDetail2Menu(a_source);
             });
     }});
@@ -491,12 +482,32 @@ void Stores::VaultAssignment(RE::TESObjectREFRPtr a_source) {
 
     options.push_back({Translate("Vault.AssignVault"), [this, a_source] {
         auto choices = Utility::GetSingleton()->GetVaultChoices();
+        choices.insert(choices.begin(), Utility::ContainerChoice{
+            .name = std::format("[{}]", Translate("Vault.Back")),
+            .action = [this, a_source] {
+                SKSE::GetTaskInterface()->AddTask([this, a_source] { VaultAssignment(a_source); });
+            }
+        });
+        choices.insert(choices.begin() + 1, Utility::ContainerChoice{
+            .name = std::format("[{}]", Translate("Vault.Exit")),
+            .action = [] {}
+        });
         ContainerSelectionState::GetSingleton()->Begin(std::move(a_source), std::move(choices));
         RE::UIMessageQueue::GetSingleton()->AddMessage(ContainerListMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
     }});
 
     options.push_back({Translate("Vault.AssignArchive"), [this, a_source] {
         auto choices = Utility::GetSingleton()->GetArchiveChoices();
+        choices.insert(choices.begin(), Utility::ContainerChoice{
+            .name = std::format("[{}]", Translate("Vault.Back")),
+            .action = [this, a_source] {
+                SKSE::GetTaskInterface()->AddTask([this, a_source] { VaultAssignment(a_source); });
+            }
+        });
+        choices.insert(choices.begin() + 1, Utility::ContainerChoice{
+            .name = std::format("[{}]", Translate("Vault.Exit")),
+            .action = [] {}
+        });
         ContainerSelectionState::GetSingleton()->Begin(std::move(a_source), std::move(choices));
         RE::UIMessageQueue::GetSingleton()->AddMessage(ContainerListMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
     }});
@@ -559,9 +570,15 @@ void Stores::ShowAlchemyMenu(RE::TESObjectREFR* a_source) {
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
-    options.push_back({Translate("Vault.GatherCooking"), [this, sourceHandle] {
+    options.push_back({Translate("Vault.GatherFood"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::Reagent, Container::Alchemy);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::DebugNotification(Translate("Vault.StoreGetMessage"));
+        if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
+    }});
+
+    options.push_back({Translate("Vault.GatherSmithing"), [this, sourceHandle] {
+        StoreToPlayer(ItemCategory::Catalyst, Container::Alchemy);
+        RE::DebugNotification(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
@@ -583,6 +600,9 @@ void Stores::ShowAlchemyMenu(RE::TESObjectREFR* a_source) {
     ShowDynamicMessageBox(title, std::move(options), cancelIndex);
 }
 
+//===================================================
+// *Alchemy Menus
+//===================================================
 void Stores::SoulgemMenu(RE::TESObjectREFR* a_source) {
     if (!a_source) return;
     OpenStoreObject(a_source, [this](RE::TESObjectREFR* a_openSource) { ShowSoulgemMenu(a_openSource); });
@@ -1530,34 +1550,18 @@ void Stores::ShowTreasureMenu(RE::TESObjectREFR* a_source) {
     });
 }
 
-void Stores::StolenMenu(RE::TESObjectREFR* a_source) {
+void Stores::PersonalMenu(RE::TESObjectREFR* a_source) {
     if (!a_source) return;
-    OpenStoreObject(a_source, [this](RE::TESObjectREFR* a_openSource) { ShowStolenMenu(a_openSource); });
+    OpenStoreObject(a_source, [this](RE::TESObjectREFR* a_openSource) { ShowPersonalMenu(a_openSource); });
 }
 
-void Stores::ShowStolenMenu(RE::TESObjectREFR* a_source) {
+void Stores::ShowPersonalMenu(RE::TESObjectREFR* a_source) {
     if (!a_source) return;
     const auto sourceHandle = a_source->GetHandle();
 
     // Open the container
     if (auto source = sourceHandle.get())
-        OpenStorageMenu(Container::Stolen, source.get(), [this](RE::TESObjectREFR* a_source) {
-            if (a_source) CloseStoreObject(a_source);
-    });
-}
-
-void Stores::FollowerMenu(RE::TESObjectREFR* a_source) {
-    if (!a_source) return;
-    OpenStoreObject(a_source, [this](RE::TESObjectREFR* a_openSource) { ShowFollowerMenu(a_openSource); });
-}
-
-void Stores::ShowFollowerMenu(RE::TESObjectREFR* a_source) {
-    if (!a_source) return;
-    const auto sourceHandle = a_source->GetHandle();
-
-    // Open the container
-    if (auto source = sourceHandle.get())
-        OpenStorageMenu(Container::Follower, source.get(), [this](RE::TESObjectREFR* a_source) {
+        OpenStorageMenu(Container::Personal, source.get(), [this](RE::TESObjectREFR* a_source) {
             if (a_source) CloseStoreObject(a_source);
     });
 }

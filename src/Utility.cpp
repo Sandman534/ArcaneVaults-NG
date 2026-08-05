@@ -116,6 +116,35 @@ bool Utility::FoundRestore(RE::AlchemyItem* a_potion) {
     return false;
 }
 
+bool Utility::isSmithing(RE::FormID a_form) {
+    if (SmithingMap.contains(a_form) || SmeltingMap.contains(a_form) || TanningMap.contains(a_form) || ConstructionMap.contains(a_form))
+        return true;
+
+    return false;
+}
+
+BenchType Utility::GetBenchType(RE::TESObjectREFR* a_furniture) {
+    // Smithing
+    if (a_furniture->HasKeyword(isAnvil) || a_furniture->HasKeyword(isForge) || a_furniture->HasKeyword(isTanning) || a_furniture->HasKeyword(isSmelter) || a_furniture->HasKeyword(isBlacksmith))
+        return BenchType::Smithing;
+
+    // Cooking
+    if (a_furniture->HasKeyword(isCookingPot) || a_furniture->HasKeyword(isOven) || a_furniture->HasKeyword(isCampfire))
+        return BenchType::Cooking;
+
+    // Alchemy
+    if (a_furniture->HasKeyword(isAlchemy) || a_furniture->HasKeyword(isGrainMill))
+        return BenchType::Alchemy;
+
+    // Enchanting
+    if (a_furniture->HasKeyword(isEnchanter))
+        return BenchType::Enchanting;
+
+    // Staff Enchanting
+    if (a_furniture->HasKeyword(isStaffEnchanter))
+        return BenchType::StaffEnchanting;
+}
+
 template <class T>
 T* Utility::LookupForm(RE::TESDataHandler* dataHandler, RE::FormID formID, std::string_view plugin, std::string_view name, bool required) {
     auto* form = dataHandler->LookupForm(formID, plugin);
@@ -135,16 +164,31 @@ void Utility::LoadAllForms() {
     logger::info("Loading all forms.");
     const auto dataHandler = RE::TESDataHandler::GetSingleton();
 
+    // Bench Keywords
+    isAlchemy = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x02A40B), pluginSkyrim, "Alchemy keyword");
+    isEnchanter = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x06E2A3), pluginSkyrim, "Enchanter keyword");
+    isStaffEnchanter = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x017738), pluginDragonborn, "Staff Enchanter keyword");
+    isBlacksmith = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0D932E), pluginSkyrim, "Blacksmith keyword");
+    isForge = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0CAE0A), pluginSkyrim, "Forge keyword");
+    isAnvil = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0EB60B), pluginSkyrim, "Anvil keyword");
+    isSmelter = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x09C6C3), pluginSkyrim, "Smelter keyword");
+    isTanning = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0727A0), pluginSkyrim, "Tanning keyword");
+    isGrindStone = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x088108), pluginSkyrim, "Grindstone keyword");
+    isWorkbench = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0ADB78), pluginSkyrim, "Workbench keyword");
+    isCookingPot = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x1010B2), pluginSkyrim, "Cooking Pot keyword");
+    isOven = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x002840), pluginHeathfire, "Oven keyword");
+    isCampfire = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x800), pluginCampfire, "Campfire keyword");
+    isGrainMill = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x09C6DE), pluginSkyrim, "Grain Mill keyword");
 
     // Construction Keywords
-    kForge = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x088105), pluginSkyrim, "Forge keyword");
-    kTanning = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x07866A), pluginSkyrim, "Tanning Rack keyword");
-    kSmelting = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0A5CCE), pluginSkyrim, "Smelter keyword");
-    kCarpenter = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x003015), pluginHeathfire, "Carpenter keyword");
-    kCookPot = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0A5CB3), pluginSkyrim, "Cooking Pot keyword");
-    kOven = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0117F7), pluginHeathfire, "Oven keyword");
-    kCampfire = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x800), pluginCampfire, "Campfire keyword");
-    kGrain = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x09C6DE), pluginSkyrim, "Grain keyword");
+    craftForge = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x088105), pluginSkyrim, "Forge keyword");
+    craftTanning = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x07866A), pluginSkyrim, "Tanning Rack keyword");
+    craftSmelting = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0A5CCE), pluginSkyrim, "Smelter keyword");
+    craftCarpenter = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x003015), pluginHeathfire, "Carpenter keyword");
+    craftCooking = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0A5CB3), pluginSkyrim, "Cooking Pot keyword");
+    craftOven = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x0117F7), pluginHeathfire, "Oven keyword");
+    craftCampfire = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x800), pluginCampfire, "Campfire keyword");
+    craftGrain = LookupForm<RE::BGSKeyword>(dataHandler, RE::FormID(0x09C6DE), pluginSkyrim, "Grain keyword");
 
     // Restore Effects
     RestoreHealth = LookupForm<RE::EffectSetting>(dataHandler, RE::FormID(0x3EB15), pluginSkyrim, "Restore Health Effect");
@@ -173,12 +217,16 @@ void Utility::LoadContainers([[maybe_unused]] RE::TESDataHandler* dataHandler) {
 
     // Alchemy
     AddContainer(dataHandler, Container::Alchemy, RE::FormID(0xD94), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->AlchemyMenu(a_source); }); 
+
+    // Potions
     AddContainer(dataHandler, Container::Concoction, RE::FormID(0xDA3), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->PotionMenu(a_source); });
     AddContainer(dataHandler, Container::Potion, RE::FormID(0xDA4), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->PotionPositiveMenu(a_source); });
     AddContainer(dataHandler, Container::Poison, RE::FormID(0xDA5), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->PotionNegativeMenu(a_source); });
     AddContainer(dataHandler, Container::Restorative, RE::FormID(0xDA6), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->PotionRestoreMenu(a_source); });
-    AddContainer(dataHandler, Container::Soulgem, RE::FormID(0xDAC), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->SoulgemMenu(a_source); });
     
+    // Soulgems
+    AddContainer(dataHandler, Container::Soulgem, RE::FormID(0xDAC), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->SoulgemMenu(a_source); });
+
     // Food
     AddContainer(dataHandler, Container::Food, RE::FormID(0xD9D), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->FoodMenu(a_source); });
     AddContainer(dataHandler, Container::Reagent, RE::FormID(0xDA0), ContainerGroup::Archive, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->FoodSaltMenu(a_source); });
@@ -205,8 +253,7 @@ void Utility::LoadContainers([[maybe_unused]] RE::TESDataHandler* dataHandler) {
     
     // Misc
     AddContainer(dataHandler, Container::Treasure, RE::FormID(0xDAD), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->TreasureMenu(a_source); });
-    AddContainer(dataHandler, Container::Stolen, RE::FormID(0xDAE), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->StolenMenu(a_source); });
-    AddContainer(dataHandler, Container::Follower, RE::FormID(0xDA1), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->FollowerMenu(a_source); });
+    AddContainer(dataHandler, Container::Personal, RE::FormID(0xDA1), ContainerGroup::Vault, [](RE::TESObjectREFR* a_source) { Stores::GetSingleton()->PersonalMenu(a_source); });
 }
 
 void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandler) {
@@ -223,7 +270,7 @@ void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandle
         std::string_view editorID = keyword->formEditorID.c_str();
 
         // Smithing Items
-        if (keyword == kForge) {
+        if (keyword == craftForge) {
             recipe->requiredItems.ForEachContainerObject([this](RE::ContainerObject& entry) {
                 if (entry.obj) this->SmithingMap.insert(entry.obj->GetFormID());
                 return RE::BSContainer::ForEachResult::kContinue;
@@ -231,7 +278,7 @@ void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandle
         }
 
         // Smelting Items
-        if (keyword == kSmelting) {
+        if (keyword == craftSmelting) {
             recipe->requiredItems.ForEachContainerObject([this](RE::ContainerObject& entry) {
                 if (entry.obj) this->SmeltingMap.insert(entry.obj->GetFormID());
                 return RE::BSContainer::ForEachResult::kContinue;
@@ -239,7 +286,7 @@ void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandle
         }
 
         // Tanning Items
-        if (keyword == kTanning) {
+        if (keyword == craftTanning) {
             recipe->requiredItems.ForEachContainerObject([this](RE::ContainerObject& entry) {
                 if (entry.obj) this->TanningMap.insert(entry.obj->GetFormID());
                 return RE::BSContainer::ForEachResult::kContinue;
@@ -247,7 +294,7 @@ void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandle
         }
 
         // Carpenter Items
-        if (keyword == kCarpenter || editorID.contains("BYOHBuilding") || editorID.contains("BYOHHouse")) {
+        if (keyword == craftCarpenter || editorID.contains("BYOHBuilding") || editorID.contains("BYOHHouse")) {
             recipe->requiredItems.ForEachContainerObject([this](RE::ContainerObject& entry) {
                 if (entry.obj) this->ConstructionMap.insert(entry.obj->GetFormID());
                 return RE::BSContainer::ForEachResult::kContinue;
@@ -255,13 +302,11 @@ void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandle
         }
 
         // Raw Food
-        if (keyword == kCookPot || keyword == kOven || keyword == kCampfire) {
+        if (keyword == craftCooking || keyword == craftOven || keyword == craftCampfire) {
             recipe->requiredItems.ForEachContainerObject([this](RE::ContainerObject& entry) {
                 if (entry.obj) this->RawFoodMap.insert(entry.obj->GetFormID());
                 return RE::BSContainer::ForEachResult::kContinue;
             });
-
-            CookingMap.insert(recipe->createdItem->formID);
         }
     }
 
@@ -269,5 +314,5 @@ void Utility::CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandle
     logger::info("Loaded: {} Smelting Items", SmeltingMap.size());
     logger::info("Loaded: {} Tanning Items", TanningMap.size());
     logger::info("Loaded: {} Construction Items", ConstructionMap.size());
-    logger::info("Loaded: {} Cooking Items", CookingMap.size());
+    logger::info("Loaded: {} Raw Food Items", RawFoodMap.size());
 }

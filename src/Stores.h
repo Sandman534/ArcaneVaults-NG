@@ -84,8 +84,7 @@ public:
     void WeaponStaffMenu(RE::TESObjectREFR* a_source);
     void GemstoneMenu(RE::TESObjectREFR* a_source);
     void TreasureMenu(RE::TESObjectREFR* a_source);
-    void StolenMenu(RE::TESObjectREFR* a_source);
-    void FollowerMenu(RE::TESObjectREFR* a_source);
+    void PersonalMenu(RE::TESObjectREFR* a_source);
     void PotionMenu(RE::TESObjectREFR* a_source);
     void PotionPositiveMenu(RE::TESObjectREFR* a_source);
     void PotionNegativeMenu(RE::TESObjectREFR* a_source);
@@ -121,8 +120,7 @@ private:
     void ShowWeaponStaffMenu(RE::TESObjectREFR* a_source);
     void ShowGemstoneMenu(RE::TESObjectREFR* a_source);
     void ShowTreasureMenu(RE::TESObjectREFR* a_source);
-    void ShowStolenMenu(RE::TESObjectREFR* a_source);
-    void ShowFollowerMenu(RE::TESObjectREFR* a_source);
+    void ShowPersonalMenu(RE::TESObjectREFR* a_source);
     void ShowPotionMenu(RE::TESObjectREFR* a_source);
     void ShowPotionPositiveMenu(RE::TESObjectREFR* a_source);
     void ShowPotionNegativeMenu(RE::TESObjectREFR* a_source);

@@ -10,6 +10,7 @@ public:
     struct ContainerChoice {
         std::string name;
         RE::FormID formID{ 0 };
+        std::function<void()> action;
     };
 
     static Utility* GetSingleton() {
@@ -31,6 +32,8 @@ public:
     void CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandler);
 
     bool FoundRestore(RE::AlchemyItem* a_potion);
+    bool isSmithing(RE::FormID a_form);
+    BenchType GetBenchType(RE::TESObjectREFR* a_furniture);
 
     // Container Functions
     void AddContainer(RE::TESDataHandler* a_data, Container a_name, RE::FormID a_formid, ContainerGroup a_group, ContainerAction a_action = {});
@@ -51,18 +54,36 @@ private:
     const std::string_view pluginUpdate = "Update.esm";
     const std::string_view pluginDawnguard = "Dawnguard.esm";
     const std::string_view pluginHeathfire = "HearthFires.esm";
+    const std::string_view pluginDragonborn = "Dragonborn.esm";
     const std::string_view pluginCampfire = "ccqdrsse002-firewood.esl";
     const std::string_view pluginArcaneVault = "ArcaneVault-LinkedStorage.esp";
 
+    // Bench Keywords
+    RE::BGSKeyword* isAlchemy;
+    RE::BGSKeyword* isBlacksmith;
+    RE::BGSKeyword* isEnchanter;
+    RE::BGSKeyword* isStaffEnchanter;
+    RE::BGSKeyword* isForge;
+    RE::BGSKeyword* isAnvil;
+    RE::BGSKeyword* isSmelter;
+    RE::BGSKeyword* isTanning;
+    RE::BGSKeyword* isGrindStone;
+    RE::BGSKeyword* isWorkbench;
+    RE::BGSKeyword* isCookingPot;
+    RE::BGSKeyword* isOven;
+    RE::BGSKeyword* isCampfire;
+    RE::BGSKeyword* isGrainMill;
+
+
     // Construction Keywords
-    RE::BGSKeyword* kCarpenter;
-    RE::BGSKeyword* kForge;
-    RE::BGSKeyword* kTanning;
-    RE::BGSKeyword* kSmelting;
-    RE::BGSKeyword* kCookPot;
-    RE::BGSKeyword* kOven;
-    RE::BGSKeyword* kCampfire;
-    RE::BGSKeyword* kGrain;
+    RE::BGSKeyword* craftForge;
+    RE::BGSKeyword* craftTanning;
+    RE::BGSKeyword* craftSmelting;
+    RE::BGSKeyword* craftCarpenter;
+    RE::BGSKeyword* craftCooking;
+    RE::BGSKeyword* craftOven;
+    RE::BGSKeyword* craftCampfire;
+    RE::BGSKeyword* craftGrain;
 
     // Restore Effects
     RE::EffectSetting* RestoreHealth;

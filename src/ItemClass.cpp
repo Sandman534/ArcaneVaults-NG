@@ -77,6 +77,7 @@ bool HasAllCategories(CategoryMask a_categories, CategoryMask a_wanted) noexcept
 }
 
 [[nodiscard]] CategoryMask ExpandCategories(CategoryMask categories) noexcept {
+    // Weapons
     const auto weaponTypes =
         ItemCategory::OneHand |
         ItemCategory::TwoHand |
@@ -86,6 +87,7 @@ bool HasAllCategories(CategoryMask a_categories, CategoryMask a_wanted) noexcept
     if (HasAnyCategory(categories, weaponTypes))
         categories |= ItemCategory::Weapon;
 
+    // Armor
     const auto armorTypes =
         ItemCategory::HeavyArmor |
         ItemCategory::LightArmor |
@@ -95,6 +97,7 @@ bool HasAllCategories(CategoryMask a_categories, CategoryMask a_wanted) noexcept
     if (HasAnyCategory(categories, armorTypes))
         categories |= ItemCategory::Armor;
 
+    // Concoctions
     const auto concoctionTypes =
         ItemCategory::Potion |
         ItemCategory::Poison;
@@ -102,6 +105,7 @@ bool HasAllCategories(CategoryMask a_categories, CategoryMask a_wanted) noexcept
     if (HasAnyCategory(categories, concoctionTypes))
         categories |= ItemCategory::Concoction;
 
+    // Smithing
     const auto smithingTypes =
         ItemCategory::Crafting |
         ItemCategory::Smelting |
@@ -112,6 +116,7 @@ bool HasAllCategories(CategoryMask a_categories, CategoryMask a_wanted) noexcept
     if (HasAnyCategory(categories, smithingTypes))
         categories |= ItemCategory::Smithing;
 
+    // Food
     const auto foodTypes =
         ItemCategory::RawFood |
         ItemCategory::CookedFood;
@@ -119,64 +124,69 @@ bool HasAllCategories(CategoryMask a_categories, CategoryMask a_wanted) noexcept
     if (HasAnyCategory(categories, foodTypes))
         categories |= ItemCategory::Food;
 
+    // Alchemy
+    const auto alchemyTypes =
+        ItemCategory::Ingredient |
+        ItemCategory::Reagent |
+        ItemCategory::Catalyst;
+
+    if (HasAnyCategory(categories, alchemyTypes))
+        categories |= ItemCategory::Alchemy;
+
     return categories;
 }
 
 CategoryMask ClassifyItem(RE::TESBoundObject* a_item) noexcept {
     auto* utility = Utility::GetSingleton();
     if (!a_item) return ToMask(ItemCategory::None);
+    CategoryMask categories = ToMask(ItemCategory::None);
 
     // Overrides
     if (const auto override = Settings::GetSingleton()->FindOverride(a_item))
         return ExpandCategories(*override);
 
-    CategoryMask categories = ToMask(ItemCategory::None);
-
     // Crafting
-    if (utility->SmithingMap.contains(a_item->formID)) {
-        categories |= ItemCategory::Smithing;
-        categories |= ItemCategory::Crafting;
-    }
-    if (utility->SmeltingMap.contains(a_item->formID)) {
-        categories |= ItemCategory::Smithing;
-        categories |= ItemCategory::Smelting;
-    }
-    if (utility->TanningMap.contains(a_item->formID)) {
-        categories |= ItemCategory::Smithing;
-        categories |= ItemCategory::Tanning;
-    }
-    if (utility->ConstructionMap.contains(a_item->formID)) {
-        categories |= ItemCategory::Smithing;
-        categories |= ItemCategory::Construction;
-    }
-            
-    // Ingredients
-    if (auto* ingredient = a_item->As<RE::IngredientItem>()) {
-        categories |= ItemCategory::Ingredient;
-
-        if (ingredient->IsFood()) {
-            categories |= ItemCategory::Food;
-
-            if (utility->CookingMap.contains(a_item->formID))
-                categories |= ItemCategory::Reagent;
-
-            if (a_item->HasKeywordByEditorID("VendorItemFoodRaw") || 
-                utility->RawFoodMap.contains(a_item->formID)
-            )
-                categories |= ItemCategory::RawFood;
+    if (auto* ingredient = a_item->As<RE::TESObjectMISC>()) {
+        if (utility->SmithingMap.contains(a_item->formID)) {
+            categories |= ItemCategory::Smithing;
+            categories |= ItemCategory::Crafting;
+        }
+        if (utility->SmeltingMap.contains(a_item->formID)) {
+            categories |= ItemCategory::Smithing;
+            categories |= ItemCategory::Smelting;
+        }
+        if (utility->TanningMap.contains(a_item->formID)) {
+            categories |= ItemCategory::Smithing;
+            categories |= ItemCategory::Tanning;
+        }
+        if (utility->ConstructionMap.contains(a_item->formID)) {
+            categories |= ItemCategory::Smithing;
+            categories |= ItemCategory::Construction;
         }
 
         return categories;
     }
+            
+    // Ingredients
+    if (auto* ingredient = a_item->As<RE::IngredientItem>()) {
+        categories |= ItemCategory::Alchemy;
 
-    // Food, potions, and poisons
+        if (ingredient->IsFood() || utility->RawFoodMap.contains(a_item->formID))
+            categories |= ItemCategory::Reagent;
+        else if (utility->isSmithing(a_item->formID))
+            categories |= ItemCategory::Catalyst;
+        else
+            categories |= ItemCategory::Ingredient;
+
+        return categories;
+    }
+
+    // Food, Potions, and Poisons
     if (auto* potion = a_item->As<RE::AlchemyItem>()) {
         if (potion->IsFood()) {
             categories |= ItemCategory::Food;
 
-            if (a_item->HasKeywordByEditorID("VendorItemFoodRaw") || 
-                utility->RawFoodMap.contains(a_item->formID)
-            )
+            if (a_item->HasKeywordByEditorID("VendorItemFoodRaw") || utility->RawFoodMap.contains(a_item->formID))
                 categories |= ItemCategory::RawFood;
             else 
                 categories |= ItemCategory::CookedFood;
@@ -196,7 +206,7 @@ CategoryMask ClassifyItem(RE::TESBoundObject* a_item) noexcept {
         return categories;
     }
 
-    // Armor and clothing
+    // Armor and Clothing
     if (auto* armor = a_item->As<RE::TESObjectARMO>()) {
         categories |= ItemCategory::Armor;
 
@@ -251,7 +261,7 @@ CategoryMask ClassifyItem(RE::TESBoundObject* a_item) noexcept {
         return categories;
     }
 
-    // Books, notes, scrolls, and spell tomes
+    // Books, Scrolls, and Spell Tomes
     if (auto* book = a_item->As<RE::TESObjectBOOK>()) {
         if (book->IsNoteScroll())
             categories |= ItemCategory::Scroll;
@@ -264,7 +274,7 @@ CategoryMask ClassifyItem(RE::TESBoundObject* a_item) noexcept {
         return categories;
     }
 
-    // Soul gems
+    // Soulgems
     if (auto* soulGem = a_item->As<RE::TESSoulGem>()) {
         categories |= ItemCategory::Soulgem;
 

@@ -78,30 +78,19 @@ namespace AVUI {
 			if (!editor.error.empty()) Text("%s", editor.error.c_str());
 
 			if (editor.selectedItem) {
-				constexpr std::size_t rowCount = 7;
-				constexpr auto columnCount = (categoryNames.size() + rowCount - 1) / rowCount;
+				const auto selected = std::ranges::find_if(categoryNames, [&editor](const auto& entry) {
+					return HasCategory(editor.selectedCategories, entry.second);
+				});
+				const auto preview = selected != categoryNames.end() ? selected->first : std::string_view{ "Select category" };
 
-				if (BeginTable("OverrideCategories", static_cast<int>(columnCount))) {
-					for (std::size_t row = 0; row < rowCount; ++row) {
-						TableNextRow();
-						for (std::size_t column = 0; column < columnCount; ++column) {
-							TableNextColumn();
-							const auto index = column * rowCount + row;
-							if (index >= categoryNames.size())
-								continue;
-
-							const auto& [name, category] = categoryNames[index];
-							bool selected = HasCategory(editor.selectedCategories, category);
-							if (Checkbox(name.data(), &selected)) {
-								const auto categoryMask = ToMask(category);
-								if (selected)
-									editor.selectedCategories |= categoryMask;
-								else
-									editor.selectedCategories &= ~categoryMask;
-							}
-						}
+				Text(Translate("Override.Categories"));
+				if (BeginCombo("##CategorySelection", preview.data())) {
+					for (const auto& [name, category] : categoryNames) {
+						const bool isSelected = HasCategory(editor.selectedCategories, category);
+						if (Selectable(name.data(), isSelected))
+							editor.selectedCategories = ToMask(category);
 					}
-					EndTable();
+					EndCombo();
 				}
 			}
 

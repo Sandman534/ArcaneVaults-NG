@@ -326,23 +326,37 @@ private:
         // Check for Craft Loan Setting
         if (!Settings::GetSingleton()->GSC_CraftingLoan) return;
 
+        auto* stores = Stores::GetSingleton();
+        auto* utility = Utility::GetSingleton();
+        BenchType benchType = utility->GetBenchType(a_furniture);
+
         // Begin crafting loan
-        switch (a_benchType) {
+        switch (benchType) {
         // Alchemy
-        case RE::TESFurniture::WorkBenchData::BenchType::kAlchemy:
-            Stores::GetSingleton()->AllToPlayer(Container::Alchemy);
+        case BenchType::Alchemy:
+            stores->AllToPlayer(Container::Alchemy);
             break;
 
         // Smithing
-        case RE::TESFurniture::WorkBenchData::BenchType::kCreateObject:
-        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingArmor:    
-        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingWeapon:
-            Stores::GetSingleton()->AllToPlayer(Container::Smithing);
+        case BenchType::Smithing:
+            stores->AllToPlayer(Container::Smithing);
+            stores->StoreToPlayer(ItemCategory::Catalyst, Container::Alchemy);
+            break;
+
+        // Cooking
+        case BenchType::Cooking:
+            stores->AllToPlayer(Container::Food);
+            stores->StoreToPlayer(ItemCategory::Reagent, Container::Alchemy);
             break;
 
         // Enchanting Table
-        case RE::TESFurniture::WorkBenchData::BenchType::kEnchanting:
-            Stores::GetSingleton()->AllToPlayer(Container::Soulgem);
+        case BenchType::Enchanting:
+            stores->AllToPlayer(Container::Soulgem);
+            break;
+
+        // Staff Enchanting
+        case BenchType::StaffEnchanting:
+            stores->StoreToPlayer(ItemCategory::Catalyst, Container::Alchemy);
             break;
         }
     }
@@ -353,24 +367,36 @@ private:
         // Check for Craft Loan Setting
         if (!Settings::GetSingleton()->GSC_CraftingLoan) return;
 
+        auto* stores = Stores::GetSingleton();
+        auto* utility = Utility::GetSingleton();
+        BenchType benchType = utility->GetBenchType(a_furniture);
+
         // Restore outstanding crafting loan
-        switch (a_benchType) {
+        switch (benchType) {
         // Alchemy
-        case RE::TESFurniture::WorkBenchData::BenchType::kAlchemy:
-            Stores::GetSingleton()->PlayerToStore(ItemCategory::Ingredient, Container::Alchemy);
-            Stores::GetSingleton()->PlayerToStore(ItemCategory::Reagent, Container::Alchemy);
+        case BenchType::Alchemy:
+            stores->PlayerToStore(ItemCategory::Alchemy, Container::Alchemy);
             break;
 
         // Smithing
-        case RE::TESFurniture::WorkBenchData::BenchType::kCreateObject:
-        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingArmor:    
-        case RE::TESFurniture::WorkBenchData::BenchType::kSmithingWeapon:
-            Stores::GetSingleton()->PlayerToStore(ItemCategory::Smithing, Container::Smithing);
+        case BenchType::Smithing:
+            stores->PlayerToStore(ItemCategory::Smithing, Container::Smithing);
+            stores->PlayerToStore(ItemCategory::Catalyst, Container::Alchemy);
+            break;
+
+        case BenchType::Cooking:
+            stores->PlayerToStore(ItemCategory::Food, Container::Food);
+            stores->PlayerToStore(ItemCategory::Reagent, Container::Alchemy);
             break;
 
         // Enchanting Table
-        case RE::TESFurniture::WorkBenchData::BenchType::kEnchanting:
-            Stores::GetSingleton()->PlayerToStore(ItemCategory::Soulgem, Container::Soulgem);
+        case BenchType::Enchanting:
+            stores->PlayerToStore(ItemCategory::Soulgem, Container::Soulgem);
+            break;
+
+        // Staff Enchanting
+        case BenchType::StaffEnchanting:
+            stores->PlayerToStore(ItemCategory::Catalyst, Container::Alchemy);
             break;
         }
     }

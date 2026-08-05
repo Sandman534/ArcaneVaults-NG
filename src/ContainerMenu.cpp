@@ -40,7 +40,16 @@ bool ContainerSelectionState::Complete(std::int32_t selectedIndex) {
         return false;
     }
 
+    // If there is an action associated with the selection, execute it
     const auto& choice = choices_[selectedIndex];
+    if (choice.action) {
+        auto action = choice.action;
+        Reset();
+        action();
+        return true;
+    }
+
+    // Map the Source to the Destination
     auto* destination = RE::TESForm::LookupByID<RE::TESObjectREFR>(choice.formID);
     bool mapped = false;
 
