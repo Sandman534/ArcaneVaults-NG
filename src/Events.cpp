@@ -425,12 +425,12 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 					const auto button = static_cast<RE::ButtonEvent*>(event);
 					if (!button || (button->IsPressed() && !button->IsDown())) continue;
 
-					auto device = button->device.get();
-					auto scan_code = button->GetIDCode();
+                    // Get an adjusted scan code
+                    auto device = button->device.get();
+                    auto scan_code = HelperFunctions::FixCode(device, button->GetIDCode());
 
 					if ((device == RE::INPUT_DEVICE::kKeyboard || device == RE::INPUT_DEVICE::kGamepad) && !button->IsUp()) {
-                        auto assignKeyCode = settings->GSC_AssignKeyCode;
-						if (assignKeyCode >= 0 && scan_code == static_cast<decltype(scan_code)>(assignKeyCode)) {
+						if (scan_code == settings->GSC_AssignKeyCode) {
                             auto target = RE::CrosshairPickData::GetSingleton()->target.get();
                             if (!target) continue;
                             
@@ -440,7 +440,8 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
                             // Container
                             if (auto container = target->GetBaseObject()->As<RE::TESObjectCONT>()) {
                                 const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
-                                const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || nonRespawning;
+                                const bool isInWorldspace = target->GetWorldspace() != nullptr;
+                                const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
 
                                 if (canAssign)
                                     Stores::GetSingleton()->VaultAssignment(target);
@@ -451,7 +452,8 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
                                 if (auto* ref = target.get()->GetLinkedRef(nullptr)) {
                                     if (auto container = ref->GetBaseObject()->As<RE::TESObjectCONT>()) {
                                         const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
-                                        const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || nonRespawning;
+                                        const bool isInWorldspace = ref->GetWorldspace() != nullptr;
+                                        const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
 
                                         if (canAssign)
                                             Stores::GetSingleton()->VaultAssignment(target);
