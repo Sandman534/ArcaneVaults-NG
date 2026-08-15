@@ -56,7 +56,7 @@ private:
     const std::string_view pluginHeathfire = "HearthFires.esm";
     const std::string_view pluginDragonborn = "Dragonborn.esm";
     const std::string_view pluginCampfire = "ccqdrsse002-firewood.esl";
-    const std::string_view pluginArcaneVault = "ArcaneVault-LinkedStorage.esp";
+    const std::string_view pluginArcaneVault = "ArcaneVaults-LinkedStorage.esp";
 
     // Bench Keywords
     RE::BGSKeyword* isAlchemy;

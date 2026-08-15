@@ -143,6 +143,8 @@ BenchType Utility::GetBenchType(RE::TESObjectREFR* a_furniture) {
     // Staff Enchanting
     if (a_furniture->HasKeyword(isStaffEnchanter))
         return BenchType::StaffEnchanting;
+
+    return BenchType::None;
 }
 
 template <class T>

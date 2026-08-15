@@ -450,8 +450,8 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
                             // Activate linked to container
                             else if (target->GetBaseObject()->As<RE::TESObjectACTI>()) {
                                 if (auto* ref = target.get()->GetLinkedRef(nullptr)) {
-                                    if (auto container = ref->GetBaseObject()->As<RE::TESObjectCONT>()) {
-                                        const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
+                                    if (auto actcontainer = ref->GetBaseObject()->As<RE::TESObjectCONT>()) {
+                                        const bool nonRespawning = !actcontainer->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
                                         const bool isInWorldspace = ref->GetWorldspace() != nullptr;
                                         const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
 
