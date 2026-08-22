@@ -1,4 +1,25 @@
 [submodule "lib/commonlibsse-ng"]
 	path = lib/commonlibsse-ng
-	url = https://github.com/alandtse/CommonLibVR.git
+	url = https://github.com/alandtse/CommonLibSSE-NG.git
 	branch = ng
+[submodule "extern/json"]
+	path = extern/json
+	url = https://github.com/nlohmann/json.git
+[submodule "extern/fmt"]
+	path = extern/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "extern/simpleini"]
+	path = extern/simpleini
+	url = https://github.com/brofield/simpleini
+[submodule "extern/xbyak"]
+	path = extern/xbyak
+	url = https://github.com/herumi/xbyak.git
+[submodule "extern/sksemenuframework"]
+	path = extern/sksemenuframework
+	url = https://github.com/QTR-Modding/SKSE-Menu-Framework-3
+[submodule "extern/clib-util"]
+	path = extern/clib-util
+	url = https://github.com/powerof3/CLibUtil
+[submodule "extern/QuickLootIE"]
+	path = extern/QuickLootIE
+	url = https://github.com/MissCorruption/QuickLootIE.git

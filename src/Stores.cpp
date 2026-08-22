@@ -103,14 +103,15 @@ void Stores::ShowDynamicMessageBox(std::string_view a_message, std::vector<MenuO
 
     // Set menu data
     data->callback = RE::BSTSmartPointer<RE::IMessageBoxCallback>(new MenuCallback(std::move(actions)));
-    data->type = 0;
-    data->cancelOptionIndex = a_cancelOption;
+    data->warningType = 0;
+    data->cancelButtonIndex = a_cancelOption;
     data->menuDepth = 4;
-    data->optionIndexOffset = 0;
+    data->buttonPressOffset = 0;
     data->useHtml = true;
     data->verticalButtons = false;
     data->isCancellable = a_cancelOption >= 0;
-    data->QueueMessage();
+
+    RE::MessageBoxMenu::QueueMessage(data);
 }
 
 //===================================================
@@ -218,10 +219,10 @@ void Stores::OpenStorageMenu(Container a_chest, RE::TESObjectREFR* a_source, std
             a_onClose(source.get());
     };
 
-    Events::RunAfterContainerMenuCloses(chest, returnToMenu);
+    AVEvents::RunAfterContainerMenuCloses(chest, returnToMenu);
 
     if (!chest->ActivateRef(player, 0, nullptr, 1, false)) {
-        Events::CancelContainerMenuCloseCallback();
+        AVEvents::CancelContainerMenuCloseCallback();
         returnToMenu();
     }
 }
@@ -264,7 +265,7 @@ void Stores::SortItems() {
     StoreToStore(ItemCategory::Armor, Container::Sort, Container::Armor);
     StoreToStore(ItemCategory::Weapon, Container::Sort, Container::Weapon);
     StoreToStore(ItemCategory::Concoction, Container::Sort, Container::Concoction);
-    RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+    RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
 }
 
 void Stores::OffloadItems() {
@@ -274,8 +275,7 @@ void Stores::OffloadItems() {
     PlayerToStore(ItemCategory::GrandSoulgem, Container::Soulgem);
     PlayerToStore(ItemCategory::Book, Container::Book);
     PlayerToStore(ItemCategory::RawFood, Container::Food);
-
-    RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+    RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
 }
 
 //===================================================
@@ -559,26 +559,26 @@ void Stores::ShowAlchemyMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Ingredient, Container::Alchemy);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.KeepOne"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Ingredient, Container::Alchemy);
         StoreToPlayer(ItemCategory::Ingredient, Container::Alchemy, 1);
-        RE::DebugNotification(Translate("Vault.StoreMostMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreMostMessage"));
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.GatherFood"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::Reagent, Container::Alchemy);
-        RE::DebugNotification(Translate("Vault.StoreGetMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.GatherSmithing"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::Catalyst, Container::Alchemy);
-        RE::DebugNotification(Translate("Vault.StoreGetMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) AlchemyMenu(source.get());
     }});
 
@@ -615,19 +615,19 @@ void Stores::ShowSoulgemMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Soulgem, Container::Soulgem);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) SoulgemMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.StoreGrandSouls"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::GrandSoulgem, Container::Soulgem);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) SoulgemMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.GatherEmptySouls"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::EmptySoulgem, Container::Soulgem);
-        RE::DebugNotification(Translate("Vault.StoreGetMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) SoulgemMenu(source.get());
     }});
 
@@ -662,7 +662,7 @@ void Stores::ShowPotionMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Concoction, Container::Concoction);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) PotionMenu(source.get());
     }});
 
@@ -791,20 +791,20 @@ void Stores::ShowBookMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Book, Container::Book);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) BookMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.StoreOne"), [this, sourceHandle] {
         AllToPlayer(Container::Book);
         PlayerToStore(ItemCategory::Book, Container::Book, 1);
-        RE::DebugNotification(Translate("Vault.StoreMostMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreMostMessage"));
         if (auto source = sourceHandle.get()) BookMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.GatherSpellTomes"), [this, sourceHandle] {
         StoreToPlayer(ItemCategory::SpellTome, Container::Book);
-        RE::DebugNotification(Translate("Vault.StoreGetMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreGetMessage"));
         if (auto source = sourceHandle.get()) BookMenu(source.get());
     }});
 
@@ -836,21 +836,21 @@ void Stores::ShowScrollMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Scroll, Container::Scroll);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) ScrollMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.KeepOne"), [this, sourceHandle] {
         AllToPlayer(Container::Scroll);
         PlayerToStore(ItemCategory::Scroll, Container::Scroll, 1);
-        RE::DebugNotification(Translate("Vault.StoreMostMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreMostMessage"));
         if (auto source = sourceHandle.get()) ScrollMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.KeepThree"), [this, sourceHandle] {
         AllToPlayer(Container::Scroll);
         PlayerToStore(ItemCategory::Scroll, Container::Scroll, 3);
-        RE::DebugNotification(Translate("Vault.StoreMostMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreMostMessage"));
         if (auto source = sourceHandle.get()) ScrollMenu(source.get());
     }});
 
@@ -885,7 +885,7 @@ void Stores::ShowSmithMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Smithing, Container::Smithing);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) SmithMenu(source.get());
     }});
 
@@ -1076,13 +1076,13 @@ void Stores::ShowFoodMenu(RE::TESObjectREFR* a_source) {
 
     options.push_back({Translate("Vault.StoreAll"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::Food, Container::Food);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) FoodMenu(source.get());
     }});
 
     options.push_back({Translate("Vault.StoreRaw"), [this, sourceHandle] {
         PlayerToStore(ItemCategory::RawFood, Container::Food);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) FoodMenu(source.get());
     }});
 
@@ -1213,7 +1213,7 @@ void Stores::ShowArmorMenu(RE::TESObjectREFR* a_source) {
         PlayerToStore(ItemCategory::LightArmor, Container::Armor);
         PlayerToStore(ItemCategory::Clothing, Container::Armor);
         PlayerToStore(ItemCategory::Jewelry, Container::Armor);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) ArmorMenu(source.get());
     }});
 
@@ -1381,7 +1381,7 @@ void Stores::ShowWeaponMenu(RE::TESObjectREFR* a_source) {
         PlayerToStore(ItemCategory::OneHand, Container::Weapon);
         PlayerToStore(ItemCategory::TwoHand, Container::Weapon);
         PlayerToStore(ItemCategory::Staff, Container::Weapon);
-        RE::DebugNotification(Translate("Vault.StoreAllMessage"));
+        RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
         if (auto source = sourceHandle.get()) WeaponMenu(source.get());
     }});
 

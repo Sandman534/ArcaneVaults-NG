@@ -3,16 +3,18 @@
 #include "QuickLootAPI.h"
 #include "RedirectManager.h"
 
+using namespace QuickLoot::API;
+
 namespace
 {
-    void OnOpeningQuickLootMenu(QuickLoot::OpeningLootMenuEvent* event) {
+    void OnOpeningQuickLootMenu(OpeningLootMenuEvent* event) {
         if (!event) return;
 
-        auto* container = event->container;
+        auto container = event->container.get();
         if (!container) return;
 
         // Block QuickLoot for redirected containers.
-        if (RedirectManager::GetSingleton()->FindDestination(container))
-            event->result = QuickLoot::HandleResult::kStop;
+        if (RedirectManager::GetSingleton()->FindDestination(container.get()))
+            event->result = HandleResult::kStop;
     }
 }

@@ -14,7 +14,7 @@ class MenuCallback final : public RE::IMessageBoxCallback {
 public:
     explicit MenuCallback(std::vector<MenuAction> a_actions) : actions(std::move(a_actions)){}
 
-    void Run(Message a_message) override {
+    void Run(std::uint8_t a_message) override {
         const auto index = static_cast<std::size_t>(a_message);
         if (index >= actions.size() || !actions[index]) return;
 

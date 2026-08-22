@@ -12,6 +12,7 @@ using namespace RE::BSScript;
 using namespace SKSE;
 using namespace SKSE::log;
 using namespace SKSE::stl;
+using namespace QuickLoot::API;
 
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	switch (message->type) {
@@ -19,15 +20,16 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 		AVTranslation::Install();
 		Utility::GetSingleton()->LoadAllForms();
 		Settings::GetSingleton()->Init();
-		Events::Init();
+		AVEvents::Init();
 		Menus::Init();
 		AVUI::Register();		
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
-		QuickLoot::QuickLootAPI::Init();
-		if (QuickLoot::QuickLootAPI::IsReady() && QuickLoot::QuickLootAPI::RegisterOpeningLootMenuHandler(OnOpeningQuickLootMenu))
+		QuickLootAPI::Init(Plugin::NAME.data());
+		if (QuickLootAPI::IsReady()) {
+			QuickLootAPI::RegisterOpeningLootMenuHandler(OnOpeningQuickLootMenu);
 			logger::info("QuickLoot IE integration enabled");
-		else
+		} else
 			logger::warn("QuickLoot IE API unavailable");
 		break;
 	}

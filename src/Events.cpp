@@ -477,7 +477,7 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
     }
 };
 
-namespace Events {
+namespace AVEvents {
 	void RunAfterContainerMenuCloses(RE::TESObjectREFR* a_container, std::function<void()> a_callback) {
         ContainerMenuCloseCallback::GetSingleton()->Begin(a_container, std::move(a_callback));
     }

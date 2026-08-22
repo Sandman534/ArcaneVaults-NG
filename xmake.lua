@@ -35,7 +35,9 @@ if has_config('skyrim_vr') and (has_config('skyrim_se') or has_config('skyrim_ae
 end
 
 add_rules("plugin.compile_commands.autoupdate", {outputdir = ".vscode"})
+
 target('ArcaneVaults-NG')
+    set_kind("shared")
     add_deps('commonlibsse-ng')
 
     local runtime = 'se_ae'
@@ -58,13 +60,16 @@ target('ArcaneVaults-NG')
     add_headerfiles('src/**.h')
 
     add_includedirs(
-        'src',
-        '$(projectdir)/include',
-        '$(projectdir)',
-        '$(projectdir)/ClibUtil',
-        '$(projectdir)/xbyak',
-        '$(projectdir)/json/include',
-        '$(projectdir)/simpleini'
+		'src',
+		'include',
+		'$(projectdir)',
+		'$(projectdir)/extern/clib-util/include/CLIBUtil',
+		'$(projectdir)/extern/xbyak',
+		'$(projectdir)/extern/simpleini',
+		'$(projectdir)/extern/fmt',
+		'$(projectdir)/extern/json/include',
+		'$(projectdir)/extern/QuickLootIE/include',
+		'$(projectdir)/extern/sksemenuframework/resources'
     )
 
     set_pcxxheader('src/pch.h')

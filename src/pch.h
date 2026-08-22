@@ -1,5 +1,8 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
 #pragma warning(push)
 #include <RE/Skyrim.h>
 #include <REL/Relocation.h>
