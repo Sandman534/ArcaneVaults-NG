@@ -7,27 +7,6 @@
 #include "ItemClass.h"
 
 //==============================================
-//  Extra Functions
-//==============================================
-namespace {
-    bool PlayerOwnsCurrentCell(const RE::PlayerCharacter* a_player)
-    {
-        if (!a_player) return false;
-
-        auto* cell = a_player->GetParentCell();
-        if (!cell) return false;
-
-        if (const auto* actorOwner = cell->GetActorOwner())
-            return actorOwner == a_player->GetActorBase();
-
-        if (const auto* factionOwner = cell->GetFactionOwner())
-            return a_player->IsInFaction(factionOwner);
-
-        return false;
-    }
-}
-
-//==============================================
 //  Redirects
 //==============================================
 class RedirectedContainerState {
@@ -413,11 +392,11 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 		if (a_event) {
 
 			const auto controlMap = RE::ControlMap::GetSingleton();
-			const auto playerCharacter = RE::PlayerCharacter::GetSingleton();
 			const auto playerControls = RE::PlayerControls::GetSingleton();
-            auto settings = Settings::GetSingleton();
+            auto* settings = Settings::GetSingleton();
+            auto* utility = Utility::GetSingleton();
 			// If we dont have any of these, return
-			if (!controlMap || !playerCharacter || !playerControls) return RE::BSEventNotifyControl::kContinue;
+			if (!controlMap || !playerControls) return RE::BSEventNotifyControl::kContinue;
 
 			// Was a key pressed that matches our menu hotkey
 			for (auto event = *a_event; event; event = event->next) {
@@ -429,40 +408,9 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
                     auto device = button->device.get();
                     auto scan_code = HelperFunctions::FixCode(device, button->GetIDCode());
 
-					if ((device == RE::INPUT_DEVICE::kKeyboard || device == RE::INPUT_DEVICE::kGamepad) && !button->IsUp()) {
-						if (scan_code == settings->GSC_AssignKeyCode) {
-                            auto target = RE::CrosshairPickData::GetSingleton()->target.get();
-                            if (!target) continue;
-                            
-                            // Check player cell
-                            const bool ownsCell = PlayerOwnsCurrentCell(playerCharacter);
-
-                            // Container
-                            if (auto container = target->GetBaseObject()->As<RE::TESObjectCONT>()) {
-                                const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
-                                const bool isInWorldspace = target->GetWorldspace() != nullptr;
-                                const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
-
-                                if (canAssign)
-                                    Stores::GetSingleton()->VaultAssignment(target);
-                            }
-                            
-                            // Activate linked to container
-                            else if (target->GetBaseObject()->As<RE::TESObjectACTI>()) {
-                                if (auto* ref = target.get()->GetLinkedRef(nullptr)) {
-                                    if (auto actcontainer = ref->GetBaseObject()->As<RE::TESObjectCONT>()) {
-                                        const bool nonRespawning = !actcontainer->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
-                                        const bool isInWorldspace = ref->GetWorldspace() != nullptr;
-                                        const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
-
-                                        if (canAssign)
-                                            Stores::GetSingleton()->VaultAssignment(target);
-                                    }
-                                }
-                            }
-
-						}
-					}
+					if ((device == RE::INPUT_DEVICE::kKeyboard || device == RE::INPUT_DEVICE::kGamepad) && !button->IsUp())
+						if (scan_code == settings->GSC_AssignKeyCode)
+                            utility->ContainerRedirect();
 				}
 			}
 		}

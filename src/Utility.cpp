@@ -1,5 +1,6 @@
 #include "Utility.h"
 #include "Translation.h"
+#include "Settings.h"
 
 using AVTranslation::Translate;
 
@@ -101,6 +102,56 @@ std::vector<Utility::ContainerChoice> Utility::GetArchiveChoices() const {
     });
 
     return choices;
+}
+
+bool Utility::PlayerOwnsCurrentCell() {
+    const auto a_player = RE::PlayerCharacter::GetSingleton();
+
+    if (!a_player) return false;
+
+    auto* cell = a_player->GetParentCell();
+    if (!cell) return false;
+
+    if (const auto* actorOwner = cell->GetActorOwner())
+        return actorOwner == a_player->GetActorBase();
+
+    if (const auto* factionOwner = cell->GetFactionOwner())
+        return a_player->IsInFaction(factionOwner);
+
+    return false;
+}
+
+void Utility::ContainerRedirect() {
+    auto* settings = Settings::GetSingleton();
+    auto target = RE::CrosshairPickData::GetSingleton()->target.get();
+    if (!target) return;
+    
+    // Check player cell
+    const bool ownsCell = PlayerOwnsCurrentCell();
+
+    // Container
+    if (auto container = target->GetBaseObject()->As<RE::TESObjectCONT>()) {
+        const bool nonRespawning = !container->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
+        const bool isInWorldspace = target->GetWorldspace() != nullptr;
+        const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
+
+        if (canAssign)
+            Stores::GetSingleton()->VaultAssignment(target);
+    }
+    
+    // Activate linked to container
+    else if (target->GetBaseObject()->As<RE::TESObjectACTI>()) {
+        if (auto* ref = target.get()->GetLinkedRef(nullptr)) {
+            if (auto actcontainer = ref->GetBaseObject()->As<RE::TESObjectCONT>()) {
+                const bool nonRespawning = !actcontainer->data.flags.all(RE::CONT_DATA::Flag::kRespawn);
+                const bool isInWorldspace = ref->GetWorldspace() != nullptr;
+                const bool canAssign = !settings->GSC_AssignOnlyOwn || ownsCell || (isInWorldspace && nonRespawning);
+
+                if (canAssign)
+                    Stores::GetSingleton()->VaultAssignment(target);
+            }
+        }
+    }        
 }
 
 bool Utility::FoundRestore(RE::AlchemyItem* a_potion) {

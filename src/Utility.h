@@ -31,6 +31,7 @@ public:
     void LoadAllForms();
     void CacheTemperRecipes([[maybe_unused]] RE::TESDataHandler* dataHandler);
 
+    // Smithing/Enchanting Functions
     bool FoundRestore(RE::AlchemyItem* a_potion);
     bool isSmithing(RE::FormID a_form);
     BenchType GetBenchType(RE::TESObjectREFR* a_furniture);
@@ -43,6 +44,9 @@ public:
     [[nodiscard]] std::vector<ContainerChoice> GetArchiveChoices() const;
     [[nodiscard]] bool RunContainerAction(const RE::TESObjectREFR* container, RE::TESObjectREFR* source) const;
 
+    // Container Setter
+    bool PlayerOwnsCurrentCell();
+    void ContainerRedirect();
 private:
     struct ContainerEntry {
         RE::TESObjectREFR* container{ nullptr };
@@ -73,7 +77,6 @@ private:
     RE::BGSKeyword* isOven;
     RE::BGSKeyword* isCampfire;
     RE::BGSKeyword* isGrainMill;
-
 
     // Construction Keywords
     RE::BGSKeyword* craftForge;
