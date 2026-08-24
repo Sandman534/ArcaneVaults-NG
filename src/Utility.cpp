@@ -198,6 +198,25 @@ BenchType Utility::GetBenchType(RE::TESObjectREFR* a_furniture) {
     return BenchType::None;
 }
 
+void Utility::ConfigurationSpells() {
+    auto* settings = Settings::GetSingleton();
+    auto* player = RE::PlayerCharacter::GetSingleton();
+
+    // Add Spells
+    if (settings->GSC_AssignSpell && !player->HasSpell(AssignSpell))
+        player->AddSpell(AssignSpell);
+
+    if (settings->GSC_SortSpell && !player->HasSpell(SortSpell))
+        player->AddSpell(SortSpell);
+
+    // Remove Spells
+    if (!settings->GSC_AssignSpell && player->HasSpell(AssignSpell))
+        player->RemoveSpell(AssignSpell);
+
+    if (!settings->GSC_SortSpell && player->HasSpell(SortSpell))
+        player->RemoveSpell(SortSpell);
+}
+
 template <class T>
 T* Utility::LookupForm(RE::TESDataHandler* dataHandler, RE::FormID formID, std::string_view plugin, std::string_view name, bool required) {
     auto* form = dataHandler->LookupForm(formID, plugin);
@@ -247,6 +266,10 @@ void Utility::LoadAllForms() {
     RestoreHealth = LookupForm<RE::EffectSetting>(dataHandler, RE::FormID(0x3EB15), pluginSkyrim, "Restore Health Effect");
     RestoreMagicka = LookupForm<RE::EffectSetting>(dataHandler, RE::FormID(0x3EB17), pluginSkyrim, "Restore Magicka Effect");
     RestoreStamina = LookupForm<RE::EffectSetting>(dataHandler, RE::FormID(0x3EB16), pluginSkyrim, "Restore Stamina Effect");
+
+    // Activation Spells
+    AssignSpell = LookupForm<RE::SpellItem>(dataHandler, RE::FormID(0xDC0), pluginArcaneVault, "Assignment Spell");
+    SortSpell = LookupForm<RE::SpellItem>(dataHandler, RE::FormID(0xDC1), pluginArcaneVault, "Sorting Spell");
 
     // Storage Containers
     LoadContainers(dataHandler);

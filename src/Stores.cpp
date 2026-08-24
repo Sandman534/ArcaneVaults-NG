@@ -5,6 +5,7 @@
 #include "RedirectManager.h"
 #include "ItemClass.h"
 #include "Translation.h"
+#include "Settings.h"
 
 #include <chrono>
 #include <thread>
@@ -269,12 +270,54 @@ void Stores::SortItems() {
 }
 
 void Stores::OffloadItems() {
-    // Only take specific items
-    PlayerToStore(ItemCategory::Smithing, Container::Smithing);
-    PlayerToStore(ItemCategory::Ingredient, Container::Alchemy);
-    PlayerToStore(ItemCategory::GrandSoulgem, Container::Soulgem);
-    PlayerToStore(ItemCategory::Book, Container::Book);
-    PlayerToStore(ItemCategory::RawFood, Container::Food);
+    auto* settings = Settings::GetSingleton();
+
+    // Alchemy
+    if (settings->GSC_OffloadReagent) PlayerToStore(ItemCategory::Reagent, Container::Alchemy);
+    if (settings->GSC_OffloadCatalyst) PlayerToStore(ItemCategory::Catalyst, Container::Alchemy);
+    if (settings->GSC_OffloadIngredient) PlayerToStore(ItemCategory::Ingredient, Container::Alchemy);
+
+    // Armor
+    if (settings->GSC_OffloadClothing) PlayerToStore(ItemCategory::Clothing, Container::Armor);
+    if (settings->GSC_OffloadHeavyArmor) PlayerToStore(ItemCategory::HeavyArmor, Container::Armor);
+    if (settings->GSC_OffloadLightArmor) PlayerToStore(ItemCategory::LightArmor, Container::Armor);
+    if (settings->GSC_OffloadJewelry) PlayerToStore(ItemCategory::Jewelry, Container::Armor);
+
+    // Books
+    if (settings->GSC_OffloadBooks) PlayerToStore(ItemCategory::Book, Container::Book);
+    if (settings->GSC_OffloadSpelltomes) PlayerToStore(ItemCategory::SpellTome, Container::Book);
+    if (settings->GSC_OffloadScrolls) PlayerToStore(ItemCategory::Scroll, Container::Scroll);
+
+    // Smithing
+    if (settings->GSC_OffloadCrafting) PlayerToStore(ItemCategory::Crafting, Container::Smithing);
+    if (settings->GSC_OffloadConstruction) PlayerToStore(ItemCategory::Construction, Container::Smithing);
+    if (settings->GSC_OffloadGemstone) PlayerToStore(ItemCategory::Gemstone, Container::Smithing);
+    if (settings->GSC_OffloadSmelting) PlayerToStore(ItemCategory::Smelting, Container::Smithing);
+    if (settings->GSC_OffloadTanning) PlayerToStore(ItemCategory::Tanning, Container::Smithing);
+
+    // Concoction
+    if (settings->GSC_OffloadPotion) PlayerToStore(ItemCategory::Potion, Container::Concoction);
+    if (settings->GSC_OffloadPoison) PlayerToStore(ItemCategory::Poison, Container::Concoction);
+
+    // Food
+    if (settings->GSC_OffloadCookedFood) PlayerToStore(ItemCategory::CookedFood, Container::Food);
+    if (settings->GSC_OffloadRawFood) PlayerToStore(ItemCategory::RawFood, Container::Food);
+
+    // Soulgem
+    if (settings->GSC_OffloadEmptySoulgem) PlayerToStore(ItemCategory::EmptySoulgem, Container::Soulgem);
+    if (settings->GSC_OffloadFilledSoulgem) PlayerToStore(ItemCategory::FilledSoulgem, Container::Soulgem);
+    if (settings->GSC_OffloadGrandSoulgem) PlayerToStore(ItemCategory::GrandSoulgem, Container::Soulgem);
+
+    // Treasure
+    if (settings->GSC_OffloadTreasure) PlayerToStore(ItemCategory::Treasure, Container::Treasure);
+
+    // Weapons
+    if (settings->GSC_OffloadArchery) PlayerToStore(ItemCategory::Archery, Container::Weapon);
+    if (settings->GSC_OffloadOneHand) PlayerToStore(ItemCategory::OneHand, Container::Weapon);
+    if (settings->GSC_OffloadTwoHand) PlayerToStore(ItemCategory::TwoHand, Container::Weapon);
+    if (settings->GSC_OffloadStaffHand) PlayerToStore(ItemCategory::Staff, Container::Weapon);
+
+    // Final Message
     RE::SendHUDMessage::ShowHUDMessage(Translate("Vault.StoreAllMessage"));
 }
 

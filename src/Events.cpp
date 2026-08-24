@@ -408,9 +408,13 @@ class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
                     auto device = button->device.get();
                     auto scan_code = HelperFunctions::FixCode(device, button->GetIDCode());
 
-					if ((device == RE::INPUT_DEVICE::kKeyboard || device == RE::INPUT_DEVICE::kGamepad) && !button->IsUp())
+					if ((device == RE::INPUT_DEVICE::kKeyboard || device == RE::INPUT_DEVICE::kGamepad) && !button->IsUp()) {
 						if (scan_code == settings->GSC_AssignKeyCode)
                             utility->ContainerRedirect();
+                        
+                        if (scan_code == settings->GSC_QuickKeyCode)
+                            Stores::GetSingleton()->OffloadItems();
+                    }
 				}
 			}
 		}

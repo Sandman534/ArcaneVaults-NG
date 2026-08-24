@@ -49,8 +49,39 @@ void Settings::ForEachINIOption(Settings& settings, Func&& option) {
 	// Options
 	option(settings.GSC_GlobalRedirects, "General", "GlobalRedirect");
 	option(settings.GSC_AssignKeyCode, "General", "AssignKeyCode");
+	option(settings.GSC_QuickKeyCode, "General", "QuickKeyCode");
 	option(settings.GSC_CraftingLoan, "General", "CraftingLoan");
 	option(settings.GSC_AssignOnlyOwn, "General", "AssignOnlyOwn");
+	option(settings.GSC_AssignSpell, "General", "AssignSpell");
+	option(settings.GSC_SortSpell, "General", "SortSpell");
+
+	option(settings.GSC_OffloadReagent, "Offload", "Reagent");
+	option(settings.GSC_OffloadCatalyst, "Offload", "Catalyst");
+	option(settings.GSC_OffloadIngredient, "Offload", "Ingredient");
+	option(settings.GSC_OffloadClothing, "Offload", "Clothing");
+	option(settings.GSC_OffloadHeavyArmor, "Offload", "HeavyArmor");
+	option(settings.GSC_OffloadLightArmor, "Offload", "LightArmor");
+	option(settings.GSC_OffloadJewelry, "Offload", "Jewelry");
+	option(settings.GSC_OffloadBooks, "Offload", "Books");
+	option(settings.GSC_OffloadScrolls, "Offload", "Scrolls");
+	option(settings.GSC_OffloadSpelltomes, "Offload", "Spelltomes");
+	option(settings.GSC_OffloadCrafting, "Offload", "Crafting");
+	option(settings.GSC_OffloadConstruction, "Offload", "Construction");
+	option(settings.GSC_OffloadGemstone, "Offload", "Gemstone");
+	option(settings.GSC_OffloadSmelting, "Offload", "Smelting");
+	option(settings.GSC_OffloadTanning, "Offload", "Tanning");
+	option(settings.GSC_OffloadPotion, "Offload", "Potion");
+	option(settings.GSC_OffloadPoison, "Offload", "Poison");
+	option(settings.GSC_OffloadCookedFood, "Offload", "CookedFood");
+	option(settings.GSC_OffloadRawFood, "Offload", "RawFood");
+	option(settings.GSC_OffloadEmptySoulgem, "Offload", "EmptySoulgem");
+	option(settings.GSC_OffloadFilledSoulgem, "Offload", "FilledSoulgem");
+	option(settings.GSC_OffloadGrandSoulgem, "Offload", "GrandSoulgem");
+	option(settings.GSC_OffloadTreasure, "Offload", "Treasure");
+	option(settings.GSC_OffloadArchery, "Offload", "Archery");
+	option(settings.GSC_OffloadOneHand, "Offload", "OneHand");
+	option(settings.GSC_OffloadTwoHand, "Offload", "TwoHand");
+	option(settings.GSC_OffloadStaffHand, "Offload", "StaffHand");
 }
 
 Settings* Settings::GetSingleton() {

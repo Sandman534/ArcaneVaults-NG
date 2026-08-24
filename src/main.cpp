@@ -7,12 +7,13 @@
 #include "Settings.h"
 #include "AVUI.h"
 #include "Translation.h"
+#include "Papyrus.h"
 
 using namespace RE::BSScript;
 using namespace SKSE;
 using namespace SKSE::log;
 using namespace SKSE::stl;
-using namespace QuickLoot::API;
+using namespace QuickLoot;
 
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 	switch (message->type) {
@@ -25,14 +26,18 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message) {
 		AVUI::Register();		
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
-		QuickLootAPI::Init(Plugin::NAME.data());
+		QuickLootAPI::Init();
 		if (QuickLootAPI::IsReady()) {
 			QuickLootAPI::RegisterOpeningLootMenuHandler(OnOpeningQuickLootMenu);
 			logger::info("QuickLoot IE integration enabled");
 		} else
 			logger::warn("QuickLoot IE API unavailable");
 		break;
+	case SKSE::MessagingInterface::kPostLoadGame:
+		Utility::GetSingleton()->ConfigurationSpells();
+		break;
 	}
+	
 }
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
@@ -52,6 +57,11 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	SKSE::Init(a_skse);
 	SKSE::AllocTrampoline(128);
 	g_messaging->RegisterListener("SKSE", SKSEMessageHandler);
+
+	if (const auto* papyrus = SKSE::GetPapyrusInterface(); !papyrus || !papyrus->Register(Papyrus::Register)) {
+		logger::critical("Failed to register Papyrus interface");
+		return false;
+	}
 
 	// Serialization
 	if (auto* serialization = SKSE::GetSerializationInterface()) {

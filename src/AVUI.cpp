@@ -1,6 +1,7 @@
 ﻿#include "AVUI.h"
 #include "Translation.h"
 #include "ItemClass.h"
+#include "Utility.h"
 
 using AVTranslation::Translate;
 
@@ -11,17 +12,20 @@ namespace AVUI {
 		// Render Menu
 		SKSEMenuFramework::SetSection(Translate("Settings.ModName"));
 		SKSEMenuFramework::AddSectionItem(Translate("Options"), RenderOptions);
+		SKSEMenuFramework::AddSectionItem("Quick Transfer", RenderTransfer);
 		SKSEMenuFramework::AddSectionItem(Translate("Override"), RenderOverrides);
 	}
 
 	void __stdcall RenderOptions() {
-		Settings* Settings = Settings::GetSingleton();
+		auto* setting = Settings::GetSingleton();
+		auto* utility = Utility::GetSingleton();
+
 		bool changeOption = false;
 
 		// Hotkey Options
 		Text(Translate("Options.Hotkey"));
 		SameLine();
-		int &hotkey = Settings->GSC_AssignKeyCode;
+		int &hotkey = setting->GSC_AssignKeyCode;
 
 		// Show the button with current hotkey name
 		if (Button(waitKey ? Translate("Options.WaitKey") : GetKeyName((ImGuiKey)HelperFunctions::IDCodeToImGuiKey(hotkey)))) {
@@ -49,15 +53,114 @@ namespace AVUI {
 				changeOption = true;
 			}
 		}
-		if (Checkbox(Translate("Options.Redirect"), &Settings->GSC_GlobalRedirects))
+		if (Checkbox(Translate("Options.Redirect"), &setting->GSC_GlobalRedirects))
 			changeOption = true;		
-		if (Checkbox(Translate("Options.CraftLoan"), &Settings->GSC_CraftingLoan))
+		if (Checkbox(Translate("Options.CraftLoan"), &setting->GSC_CraftingLoan))
 			changeOption = true;
-		if (Checkbox(Translate("Options.OnlyOwn"), &Settings->GSC_AssignOnlyOwn))
+		if (Checkbox(Translate("Options.OnlyOwn"), &setting->GSC_AssignOnlyOwn))
 			changeOption = true;
 
+		// Configuration Spells
+		if (Checkbox(Translate("Options.AssignSpell"), &setting->GSC_AssignSpell)) {
+			changeOption = true;
+			utility->ConfigurationSpells();
+		}
+		if (Checkbox(Translate("Options.SortSpell"), &setting->GSC_SortSpell)) {
+			changeOption = true;
+			utility->ConfigurationSpells();
+		}
+		
 		if (changeOption)
-			Settings->SaveINI();
+			setting->SaveINI();
+	}
+
+	void __stdcall RenderTransfer() {
+		auto* setting = Settings::GetSingleton();
+		auto* utility = Utility::GetSingleton();
+		bool changeOption = false;
+
+		if (CollapsingHeader(Translate("Vault.Alchemy"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Catalyst"), &setting->GSC_OffloadCatalyst))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Ingredient"), &setting->GSC_OffloadIngredient))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Reagent"), &setting->GSC_OffloadReagent))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.Armor"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Clothing"), &setting->GSC_OffloadClothing))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.HeavyArmor"), &setting->GSC_OffloadHeavyArmor))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Jewelry"), &setting->GSC_OffloadJewelry))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.LightArmor"), &setting->GSC_OffloadLightArmor))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.Book"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Book"), &setting->GSC_OffloadBooks))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Scroll"), &setting->GSC_OffloadScrolls))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.SpellTome"), &setting->GSC_OffloadSpelltomes))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.Concoction"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Poison"), &setting->GSC_OffloadPoison))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Potion"), &setting->GSC_OffloadPotion))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.Food"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Cooked"), &setting->GSC_OffloadCookedFood))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Raw"), &setting->GSC_OffloadRawFood))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.Smithing"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Construction"), &setting->GSC_OffloadConstruction))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Crafting"), &setting->GSC_OffloadCrafting))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Gemstones"), &setting->GSC_OffloadGemstone))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Tanning"), &setting->GSC_OffloadTanning))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Smelting"), &setting->GSC_OffloadSmelting))
+				changeOption = true;
+
+		}
+
+		if (CollapsingHeader(Translate("Vault.Soulgem"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.SoulgemEmpty"), &setting->GSC_OffloadEmptySoulgem))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.SoulgemFilled"), &setting->GSC_OffloadFilledSoulgem))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.SoulgemGrand"), &setting->GSC_OffloadGrandSoulgem))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.Weapon"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Archery"), &setting->GSC_OffloadArchery))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.OneHand"), &setting->GSC_OffloadOneHand))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.Staff"), &setting->GSC_OffloadTwoHand))
+				changeOption = true;
+			if (Checkbox(Translate("Vault.TwoHand"), &setting->GSC_OffloadStaffHand))
+				changeOption = true;
+		}
+
+		if (CollapsingHeader(Translate("Vault.More"), ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (Checkbox(Translate("Vault.Treasure"), &setting->GSC_OffloadTreasure))
+				changeOption = true;
+		}
+
 	}
 
 	void __stdcall RenderOverrides() {

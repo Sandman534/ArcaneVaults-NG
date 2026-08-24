@@ -47,6 +47,10 @@ public:
     // Container Setter
     bool PlayerOwnsCurrentCell();
     void ContainerRedirect();
+
+    // Container Setter
+    void ConfigurationSpells();
+
 private:
     struct ContainerEntry {
         RE::TESObjectREFR* container{ nullptr };
@@ -92,6 +96,10 @@ private:
     RE::EffectSetting* RestoreHealth;
     RE::EffectSetting* RestoreMagicka;
     RE::EffectSetting* RestoreStamina;
+
+    // Activation Spells
+    RE::SpellItem* AssignSpell;
+    RE::SpellItem* SortSpell;
 
     // Containers
     std::unordered_map<Container,ContainerEntry> containerMap;

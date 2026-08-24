@@ -5,6 +5,8 @@
 	"Options.CraftLoan": "Transfer Stored Materials When Crafting",
 	"Options.Redirect": "Persistent Storage Redirects",
 	"Options.OnlyOwn": "Assign Only in Owned Cells or NonRespawn Containers",
+	"Options.AssignSpell": "Enable Assignment Spell",
+	"Options.SortSpell": "Enable Sorting Spell",
 	"Options.Hotkey": "Assignment Hotkey",
 	"Options.WaitKey": "Press a key...",
 	"Options.Reset": "Reset",
@@ -30,13 +32,13 @@
 	"Vault.Open": "Open Vault",
 
 	"Vault.AssignArcane": "Bind Arcane Vault",
-	"Vault.AssignSort": "Bind Conduit Vault",
+	"Vault.AssignSort": "Bind Sort Vault",
 	"Vault.AssignVault": "Bind Vault",
 	"Vault.AssignArchive": "Bind Archive",
 	"Vault.AssignRemove": "Remove Binding",
 
-	"Vault.ArcaneOffload": "Transference",
-	"Vault.ArcaneSort": "Open Conduit",
+	"Vault.ArcaneOffload": "Quick Transfer",
+	"Vault.ArcaneSort": "Open Sort",
 	"Vault.ArcaneVaults": "Open Vaults",
 	"Vault.ArcaneArchives": "Open Archives",
 
@@ -57,7 +59,7 @@
 	"Vault.Assign": "Binding",
 	"Vault.Arcane": "Arcane",
 	"Vault.Alchemy": "Alchemy",
-	"Vault.Conduit": "Conduit",
+	"Vault.Conduit": "Sort",
 	"Vault.Smithing": "Smithing",
 	"Vault.Armor": "Armor",
 	"Vault.Weapon": "Weapon",
@@ -88,5 +90,12 @@
 	"Vault.OneHand": "One-Handed",
 	"Vault.TwoHand": "Two-Handed",
 	"Vault.Archery": "Archery",
-	"Vault.Staff": "Staff"
+	"Vault.Staff": "Staff",
+	"Vault.Reagent": "Reagent",
+	"Vault.Catalyst": "Catalyst",
+	"Vault.Ingredient": "Ingredient",
+	"Vault.SpellTome": "Spell Tome",
+	"Vault.SoulgemEmpty": "Empty",
+	"Vault.SoulgemFilled": "Filled",
+	"Vault.SoulgemGrand": "Grand"
 }

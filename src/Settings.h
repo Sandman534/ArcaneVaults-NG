@@ -12,9 +12,40 @@ class Settings {
 public:
 	// Hotkeys
 	int GSC_AssignKeyCode{ -1 };
+	int GSC_QuickKeyCode{ -1 };
 	bool GSC_GlobalRedirects{ true };
 	bool GSC_CraftingLoan{ false };
 	bool GSC_AssignOnlyOwn{ true };
+	bool GSC_AssignSpell{ true };
+	bool GSC_SortSpell{ true };
+
+	bool GSC_OffloadReagent{ true };
+	bool GSC_OffloadCatalyst{ true };
+	bool GSC_OffloadIngredient{ true };
+	bool GSC_OffloadClothing{ false };
+	bool GSC_OffloadHeavyArmor{ false };
+	bool GSC_OffloadLightArmor{ false };
+	bool GSC_OffloadJewelry{ false };
+	bool GSC_OffloadBooks{ false };
+	bool GSC_OffloadScrolls{ false };
+	bool GSC_OffloadSpelltomes{ false };
+	bool GSC_OffloadCrafting{ true };
+	bool GSC_OffloadConstruction{ true };
+	bool GSC_OffloadGemstone{ true };
+	bool GSC_OffloadSmelting{ true };
+	bool GSC_OffloadTanning{ true };
+	bool GSC_OffloadPotion{ false };
+	bool GSC_OffloadPoison{ false };
+	bool GSC_OffloadCookedFood{ false };
+	bool GSC_OffloadRawFood{ true };
+	bool GSC_OffloadEmptySoulgem{ false };
+	bool GSC_OffloadFilledSoulgem{ false };
+	bool GSC_OffloadGrandSoulgem{ true };
+	bool GSC_OffloadTreasure{ false };
+	bool GSC_OffloadArchery{ false };
+	bool GSC_OffloadOneHand{ false };
+	bool GSC_OffloadTwoHand{ false };
+	bool GSC_OffloadStaffHand{ false };
 
 	void Init();
 
