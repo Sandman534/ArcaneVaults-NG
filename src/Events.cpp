@@ -298,7 +298,7 @@ public:
 		logger::info("Handler Installed: Furniture");
     }
 
-private:
+public:
     static void OnCraftingFurnitureEntered(RE::TESObjectREFR* a_furniture, RE::TESFurniture::WorkBenchData::BenchType a_benchType) {
         logger::info("Player entered crafting furniture {:08X}, bench type {}", a_furniture->GetFormID(), std::to_underlying(a_benchType));
 
@@ -381,6 +381,112 @@ private:
     }
 };
 
+// TESFurnitureEvent may not be delivered in some setups even though the event sink
+// registers successfully. Loan materials directly from TESFurniture::Activate so
+// they are present before CraftingMenu builds its recipe list, then restore them
+// when CraftingMenu closes. The original TESFurnitureEvent path remains intact.
+class CraftingLoanFallbackState {
+public:
+    static CraftingLoanFallbackState* GetSingleton() {
+        static CraftingLoanFallbackState singleton;
+        return &singleton;
+    }
+
+    void Begin(RE::TESObjectREFR* a_furniture, RE::TESFurniture::WorkBenchData::BenchType a_benchType) {
+        if (!a_furniture)
+            return;
+
+        const auto handle = a_furniture->GetHandle().native_handle();
+        if (activeFurniture_ == handle)
+            return;
+
+        if (activeFurniture_ != RE::RefHandle{})
+            Restore();
+
+        activeFurniture_ = handle;
+        benchType_ = a_benchType;
+
+        logger::info("Crafting loan fallback activated for furniture {:08X}, bench type {}",
+            a_furniture->GetFormID(), std::to_underlying(a_benchType));
+        FurnitureEventHandler::OnCraftingFurnitureEntered(a_furniture, a_benchType);
+    }
+
+    void Restore() {
+        if (activeFurniture_ == RE::RefHandle{})
+            return;
+
+        if (auto furniture = RE::TESObjectREFR::LookupByHandle(activeFurniture_)) {
+            logger::info("Crafting loan fallback restoring furniture {:08X}, bench type {}",
+                furniture->GetFormID(), std::to_underlying(benchType_));
+            FurnitureEventHandler::OnCraftingFurnitureExited(furniture.get(), benchType_);
+        }
+
+        activeFurniture_ = {};
+        benchType_ = RE::TESFurniture::WorkBenchData::BenchType::kNone;
+    }
+
+private:
+    RE::RefHandle activeFurniture_{};
+    RE::TESFurniture::WorkBenchData::BenchType benchType_{ RE::TESFurniture::WorkBenchData::BenchType::kNone };
+};
+
+class FurnitureCraftingLoanHook {
+public:
+    static void Install() {
+        REL::Relocation<std::uintptr_t> vtable{ RE::TESFurniture::VTABLE[0] };
+        original_ = vtable.write_vfunc(0x37, Thunk);
+        logger::info("Furniture crafting-loan activation fallback hook installed");
+    }
+
+private:
+    static bool Thunk(RE::TESFurniture* a_baseObject, RE::TESObjectREFR* a_target,
+        RE::TESObjectREFR* a_activator, std::uint8_t a_arg3, RE::TESBoundObject* a_object,
+        std::int32_t a_targetCount) {
+        const auto benchType = a_baseObject->workBenchData.benchType.get();
+        const bool craftingActivation =
+            a_target &&
+            a_activator == RE::PlayerCharacter::GetSingleton() &&
+            benchType != RE::TESFurniture::WorkBenchData::BenchType::kNone &&
+            Settings::GetSingleton()->GSC_CraftingLoan;
+
+        if (craftingActivation)
+            CraftingLoanFallbackState::GetSingleton()->Begin(a_target, benchType);
+
+        const bool result = original_(a_baseObject, a_target, a_activator, a_arg3, a_object, a_targetCount);
+
+        if (craftingActivation && !result)
+            CraftingLoanFallbackState::GetSingleton()->Restore();
+
+        return result;
+    }
+
+    static inline REL::Relocation<decltype(Thunk)> original_;
+};
+
+class CraftingMenuEventHandler final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+public:
+    static CraftingMenuEventHandler* GetSingleton() {
+        static CraftingMenuEventHandler singleton;
+        return &singleton;
+    }
+
+    RE::BSEventNotifyControl ProcessEvent(
+        const RE::MenuOpenCloseEvent* a_event,
+        [[maybe_unused]] RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override {
+        if (!a_event || a_event->menuName != RE::CraftingMenu::MENU_NAME)
+            return RE::BSEventNotifyControl::kContinue;
+
+        if (!a_event->opening)
+            CraftingLoanFallbackState::GetSingleton()->Restore();
+
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+    static void Register() {
+        RE::UI::GetSingleton()->AddEventSink(CraftingMenuEventHandler::GetSingleton());
+        logger::info("Handler Installed: Crafting Menu Fallback");
+    }
+};
 class InputHandler : public RE::BSTEventSink<RE::InputEvent*> {
 	public:
     static InputHandler* GetSingleton() {
@@ -447,9 +553,14 @@ namespace AVEvents {
         ActivatorActivationHook::Install();
         ActivatorActivateTextHook::Install();
 
+        // Crafting loan fallback. Runs before CraftingMenu population and complements
+        // rather than replaces the original TESFurnitureEvent path.
+        FurnitureCraftingLoanHook::Install();
+
         // Register Events
         ContainerMenuEventHandler::Register();
         FurnitureEventHandler::Register();
+        CraftingMenuEventHandler::Register();
         InputHandler::Register();
 	}
 }
