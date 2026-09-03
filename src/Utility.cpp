@@ -176,7 +176,11 @@ bool Utility::isSmithing(RE::FormID a_form) {
 
 BenchType Utility::GetBenchType(RE::TESObjectREFR* a_furniture) {
     // Smithing
-    if (a_furniture->HasKeyword(isAnvil) || a_furniture->HasKeyword(isForge) || a_furniture->HasKeyword(isTanning) || a_furniture->HasKeyword(isSmelter) || a_furniture->HasKeyword(isBlacksmith) || a_furniture->HasKeyword(isGrindStone) || a_furniture->HasKeyword(isWorkbench))
+    if (a_furniture->HasKeyword(isAnvil) || a_furniture->HasKeyword(isForge) || 
+        a_furniture->HasKeyword(isTanning) || a_furniture->HasKeyword(isSmelter) || 
+        a_furniture->HasKeyword(isBlacksmith) || a_furniture->HasKeyword(isGrindStone) || 
+        a_furniture->HasKeyword(isWorkbench)
+    )
         return BenchType::Smithing;
 
     // Cooking
@@ -195,9 +199,7 @@ BenchType Utility::GetBenchType(RE::TESObjectREFR* a_furniture) {
     if (a_furniture->HasKeyword(isStaffEnchanter))
         return BenchType::StaffEnchanting;
 
-    // Keyword-light modded furniture can still advertise an unambiguous native
-    // workbench type. kCreateObject is intentionally not mapped because several
-    // different kinds of crafting furniture share that value.
+    // If keywords dont work, try work bench data to be sure
     if (auto* furniture = a_furniture->GetBaseObject()->As<RE::TESFurniture>()) {
         switch (furniture->workBenchData.benchType.get()) {
         case RE::TESFurniture::WorkBenchData::BenchType::kSmithingWeapon:

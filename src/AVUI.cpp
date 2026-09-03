@@ -161,6 +161,8 @@ namespace AVUI {
 				changeOption = true;
 		}
 
+		if (changeOption)
+			setting->SaveINI();
 	}
 
 	void __stdcall RenderOverrides() {
